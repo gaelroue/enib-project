@@ -4,12 +4,11 @@
 ############################################################################
 EXEC=main
 
-DESTDIR = /net/nfs-etu/vol/vFiler_NFS_ETU/Data/e2011/l1bouill/Document/S9/enib-project
-
+DESTDIR = /usr/bin
 #
 #	sub-directories and source files
 #
-SRC= main.c
+SRC= main.c 
 
 ############################################################################
 # C compiler & linker flags 
@@ -18,7 +17,7 @@ CFLAGS=-Wall -g
 LDFLAGS=
 
 CC=gcc
-
+DEPS = defs.h
 ############################################################################
 # building rules
 #
@@ -33,7 +32,7 @@ all:
 $(EXEC): $(OBJS)
 	$(CC) -o $@ $^ $(LDFLAGS)
   
-%.o: %.c
+%.o: %.c ($DEPS)
 	@$(CC) -MM $(CFLAGS) -o $(DEPDIR)/$*.d $<
 	$(CC) -c $(CFLAGS) $<
 
