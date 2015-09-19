@@ -51,6 +51,5 @@ void xbee_close(struct xbee_serial * s)
 	if (close(s->fd) != 0) {
 		perror(s->device);
 		exit(1);
-
 	}
 }
