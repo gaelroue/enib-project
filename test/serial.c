@@ -1,12 +1,12 @@
 #include "base.h"
 #include "drivers/xbee_serial.h"
 
-#define PORT "/dev/ttyUSB1"
+#define PORT "/dev/ttyUSB0"
 
 int main(int argc, char ** argv)
 {
 	struct xbee_serial * xbee;
-	xbee->device = PORT;
+	xbee->device = (char *)PORT;
 
 	xbee_open(xbee);
 

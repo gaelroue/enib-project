@@ -14,6 +14,6 @@ include_directories(
 add_subdirectory(src/drivers)
 add_subdirectory(src/zigbee)
 
-add_executable(${PRJ} ${MAIN})
-#add_executable(${PRJ} ${TEST})
+#add_executable(${PRJ} ${MAIN})
+add_executable(${PRJ} ${TEST})
 target_link_libraries(${PRJ} drivers zigbee)
