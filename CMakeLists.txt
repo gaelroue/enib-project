@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 set(PRJ elec)
 set(MAIN src/main.c)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 set(TEST test/serial.c)
 
 project($PRJ)

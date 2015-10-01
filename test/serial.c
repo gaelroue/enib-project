@@ -12,8 +12,8 @@ int main(int argc, char ** argv)
 
 	char * buf =  "\x7E\x00\x04\x08\x01\x4D\x59\x50";
 	write(xbee->fd, buf, 8); 
-
-
+	xbee_read(xbee);
+	
 	/* Closing file descriptor */
 	xbee_close(xbee);
 	return 0;
