@@ -57,18 +57,19 @@ void xbee_close(struct xbee_serial * s)
 
 static void xbee_get_header(int fd, struct xbee_header * h)
 {
-	uint8_t buf[3];
-	if (read(fd, buf, 3) < 1) {
+	uint8_t buf[4];
+	if (read(fd, buf, 4) < 1) {
 		perror("Error getting frame header");
 		return;
 	}
 
 	h->delimiter = buf[0];
 	h->length = ((uint16_t)buf[1] << 8) | buf[2];
+	h->api = buf[3];
 
 }
 
-static void xbee_get_dataframe(int fd, uint8_t * data, uint16_t length)
+static void xbee_get_rawdata(int fd, uint8_t * data, uint16_t length)
 {
 	if (read(fd, data, length) < 1) {
 		perror("Error getting frame data");
@@ -76,7 +77,7 @@ static void xbee_get_dataframe(int fd, uint8_t * data, uint16_t length)
 	}
 }
 
-void xbee_read(struct xbee_serial * s)
+struct xbee_rawframe * xbee_read(struct xbee_serial * s)
 {
 	struct pollfd fds;
 	int timeout_msecs = 500;
@@ -94,14 +95,18 @@ void xbee_read(struct xbee_serial * s)
 		return;
 	}
 
+	struct xbee_rawframe * frame = malloc(sizeof(struct xbee_rawframe));
+
 	if (fds.revents & POLLIN ) {
-		struct xbee_header * xbee_h = calloc(1, sizeof(struct xbee_header));
-		xbee_get_header(s->fd, xbee_h);
+		xbee_get_header(s->fd, &frame->header);
 
-		assert(xbee_h);
-		assert(xbee_h->length);
+		assert(frame);
+		assert(frame->header.length);
 
-		uint8_t * data = malloc(xbee_h->length * sizeof(uint8_t));
-		xbee_get_dataframe(s->fd, data, 7);
+		/* length -1 because xbee_get_header get the first 4 bytes of frame*/
+		frame->rawdata = malloc((frame->header.length - 1) * sizeof(uint8_t));
+		xbee_get_rawdata(s->fd, frame->rawdata, frame->header.length - 1);
 	}
+
+	return frame;
 }

@@ -7,7 +7,13 @@ struct xbee_header
 		// TO DO : cf pour htons/htonl
 	uint16_t length;/*< Longueur de la trame entre len et checksum.*/
 	uint8_t api;/*< Api mode */
-	uint8_t frame_id; /*< Id de la frame (TO DO : cf si on peut l'utiliser comme ID capteur )*/
+	//uint8_t frame_id; /*< Id de la frame (TO DO : cf si on peut l'utiliser comme ID capteur )*/
+};
+
+struct xbee_rawframe
+{
+	struct xbee_header header;
+	uint8_t * rawdata;
 };
 
 struct at_command
@@ -38,7 +44,7 @@ struct remote_at_command
 	uint8_t cmd_options;/*<0x02 - Apply changes on remote device.
 NOTE: If this bit is not set, an AC (or WR+FR) command must be sent before changes will take effect.
 All other bits must be set to zero.*/
-	struct at_command;
+	struct at_command at;
 };
 
 #endif
