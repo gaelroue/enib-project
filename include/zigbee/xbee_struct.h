@@ -10,16 +10,23 @@ struct __attribute__((__packed__)) xbee_header
 	uint8_t frame_id; /*< Id de la frame (TO DO : cf si on peut l'utiliser comme ID capteur )*/
 };
 
-struct xbee_rawframe
+struct __attribute__((__packed__)) xbee_rawframe
 {
 	struct xbee_header header;
-	uint8_t * rawdata;
+	uint8_t rawdata[];
 };
 
-struct at_command
+struct __attribute__((__packed__)) at_command
 {
-	uint8_t at_cmd[2]; /*< Nom de commande en ASCII */
-	uint8_t * data_at_cmd;/*< pointeur sur le premier elèment de donnée; */
+	uint16_t at_cmd; /*< Nom de commande en ASCII */
+	uint8_t data_at_cmd[];/*< pointeur sur le premier elèment de donnée; */
+};
+
+struct __attribute__((__packed__)) xbee_atcommand
+{
+	struct xbee_header header;
+	struct at_command at;
+	uint8_t checksum;
 };
 
 struct __attribute__((__packed__)) tx_request
@@ -43,7 +50,7 @@ struct __attribute__((__packed__)) xbee_dataframe
 
 };
 
-struct remote_at_command
+struct __attribute__((__packed__)) remote_at_command
 {
 	uint8_t dest_mac[8]; /*< Adresse MAC de destination */
 	uint16_t dest_addr; /*< Adresse dynamique sur le réseau*/

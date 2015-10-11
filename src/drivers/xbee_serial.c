@@ -57,15 +57,16 @@ void xbee_close(struct xbee_serial * s)
 
 static void xbee_get_header(int fd, struct xbee_header * h)
 {
-	uint8_t buf[4];
-	if (read(fd, buf, 4) < 1) {
+	uint8_t buf[5];
+	if (read(fd, buf, 5) < 1) {
 		perror("Error getting frame header");
 		return;
 	}
 
 	h->delimiter = buf[0];
-	h->length = ((uint16_t)buf[1] << 8) | buf[2];
+	h->length = htons(((uint16_t)buf[1] << 8) | buf[2]);
 	h->api = buf[3];
+	h->frame_id = buf[4];
 
 }
 
@@ -103,8 +104,8 @@ struct xbee_rawframe * xbee_read(struct xbee_serial * s)
 		assert(frame);
 		assert(frame->header.length);
 
-		/* length -1 because xbee_get_header get the first 4 bytes of frame*/
-		frame->rawdata = malloc((frame->header.length - 1) * sizeof(uint8_t));
+		/* length + 1 to get checksum */
+		frame = realloc(frame, sizeof(struct xbee_rawframe) + (frame->header.length -1) * sizeof(uint8_t));
 		xbee_get_rawdata(s->fd, frame->rawdata, frame->header.length - 1);
 	}
 
