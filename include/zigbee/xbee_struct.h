@@ -7,7 +7,7 @@ struct xbee_header
 		// TO DO : cf pour htons/htonl
 	uint16_t length;/*< Longueur de la trame entre len et checksum.*/
 	uint8_t api;/*< Api mode */
-	//uint8_t frame_id; /*< Id de la frame (TO DO : cf si on peut l'utiliser comme ID capteur )*/
+	uint8_t frame_id; /*< Id de la frame (TO DO : cf si on peut l'utiliser comme ID capteur )*/
 };
 
 struct xbee_rawframe

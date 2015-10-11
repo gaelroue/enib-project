@@ -110,3 +110,14 @@ struct xbee_rawframe * xbee_read(struct xbee_serial * s)
 
 	return frame;
 }
+
+void xbee_print_rawframe(struct xbee_rawframe * frame)
+{
+	printf("%x\n%x\n%x\n", frame->header.delimiter, frame->header.length, frame->header.api);
+
+	int i;
+	for (i = 0; i < frame->header.length - 1; i++) {
+		printf("%x\n", frame->rawdata[i]);
+	}
+
+}
