@@ -10,12 +10,20 @@ int main(int argc, char ** argv)
 	xbee->device = (char *)PORT;
 	struct xbee_rawframe * frame 	;
 	xbee_open(xbee);
-	while(1){
-	frame = xbee_read(xbee);
 
-	xbee_print_rawframe(frame);
+	//char * buf =  "\x7E\x00\x04\x08\x01\x4D\x59\x50";
+	//char * buf = "\x7E\x00\x10\x10\x01\x00\x00\x00\x00\x00\x00\x00\x00\xFF\xFF\x00\x00\x22\x44\x8A";
+	//char * buf = "\x7E\x00\x04\x08\x01\x4A\x4E\x5E";
+	//char * buf = "\x7E\x00\x04\x08\x01\x57\x52\x4D";
+	//write(xbee->fd, buf, 8); 
+	//
+	xbee_send_data(xbee->fd, "\x22", 0, 0);
 
-	free(frame);
+	//struct xbee_rawframe * frame = xbee_read(xbee);
+
+	//xbee_print_frame((uint8_t *)frame);
+
+	//free(frame);
 	
 	
 	/* Closing file descriptor */

@@ -1,7 +1,7 @@
 #ifndef XBEE_STRUCT
 #define XBEE_STRUCT
 
-struct xbee_header
+struct __attribute__((__packed__)) xbee_header
 {
 	uint8_t delimiter; /*< Début du paquet; toujours égal à 0x7E */
 		// TO DO : cf pour htons/htonl
@@ -22,7 +22,7 @@ struct at_command
 	uint8_t * data_at_cmd;/*< pointeur sur le premier elèment de donnée; */
 };
 
-struct tx_request
+struct __attribute__((__packed__)) tx_request
 {
 	uint8_t dest_mac[8]; /*< Adresse MAC de destination */
 	uint16_t dest_addr; /*< Adresse dynamique sur le réseau*/
@@ -32,8 +32,14 @@ Unused bits must be set to 0.
 0x01 - Disable retries and route repair
 0x20 - Enable APS encryption (if EE=1) Enabling APS encryption decreases the maximum number of RF payload bytes by 4 (below the value reported by NP).
 0x40 - Use the extended transmission timeout for this destination. Setting the extended timeout bit causes the stack to set the extended transmission timeout for the destination address.*/
-	uint8_t data_type; /*< Type de donnée; cf connexion_capteur.odt*/
-	uint8_t * data; /*< pointeur sur le premier élément des données */
+	uint8_t data[]; /*< pointeur sur le premier élément des données */
+};
+
+struct __attribute__((__packed__)) xbee_dataframe
+{
+	struct xbee_header header;
+	struct tx_request tx;
+	uint8_t checksum;
 
 };
 

@@ -14,7 +14,7 @@ void xbee_open(struct xbee_serial * s)
 	/*
 	 * configuration options
 	 * 	O_RDWR - we need read and write access
-	 *	O_CTTY - prevent otheri input (like keyboard) from affecting what we read
+	 *	O_CTTY - prevent other input (like keyboard) from affecting what we read
 	 *	O_NDELAY - We don't care if the other side is connected (some devices don't explicitly connect)
 	 */
 	if ((s->fd = open(s->device, O_RDWR | O_NOCTTY )) < 0) {
@@ -111,13 +111,25 @@ struct xbee_rawframe * xbee_read(struct xbee_serial * s)
 	return frame;
 }
 
-void xbee_print_rawframe(struct xbee_rawframe * frame)
+void xbee_write(int fd, uint8_t * frame)
 {
-	printf("%x\n%x\n%x\n", frame->header.delimiter, frame->header.length, frame->header.api);
+	uint16_t len = ((uint16_t)frame[1] << 8) + (uint16_t)frame[2];
 
-	int i;
-	for (i = 0; i < frame->header.length - 1; i++) {
-		printf("%x\n", frame->rawdata[i]);
+	uint8_t i;
+	for ( i = 0; i < 3 + len + 1; i++) {
+		write(fd, frame, 1);
+		frame++;
+	}
+
+}
+
+void xbee_print_frame(uint8_t * frame)
+{
+	uint16_t len = ((uint16_t)frame[1] << 8) + (uint16_t)frame[2];
+
+	uint16_t i;
+	for (i = 0; i < 3 + len + 1; i++) {
+		printf("%x\n", frame[i]);
 	}
 
 }
