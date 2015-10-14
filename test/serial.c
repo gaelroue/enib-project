@@ -17,13 +17,13 @@ int main(int argc, char ** argv)
 	//char * buf = "\x7E\x00\x04\x08\x01\x57\x52\x4D";
 	//write(xbee->fd, buf, 8); 
 	//
-	//xbee_send_data(xbee->fd, "\x22", 0, 0);
+	xbee_send_data(xbee->fd, "\x22", 1, 0, 0);
 	
 	//struct at_command * at = malloc(sizeof(struct xbee_atcommand));
 	//at->at_cmd = "MY";
 	//at->at_cmd = 0x4D59;
 
-	xbee_send_atcommand(xbee->fd, "JN", "", 0);
+	//xbee_send_atcommand(xbee->fd, "JN", "", 0);
 	//xbee_send_atwr(xbee->fd, "JN", "\x01", 0);
 
 	struct xbee_rawframe * frame = xbee_read(xbee);

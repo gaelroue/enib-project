@@ -26,7 +26,6 @@ struct __attribute__((__packed__)) xbee_atcommand
 {
 	struct xbee_header header;
 	struct at_command at;
-	uint8_t checksum;
 };
 
 struct __attribute__((__packed__)) tx_request
@@ -46,7 +45,6 @@ struct __attribute__((__packed__)) xbee_dataframe
 {
 	struct xbee_header header;
 	struct tx_request tx;
-	uint8_t checksum;
 
 };
 

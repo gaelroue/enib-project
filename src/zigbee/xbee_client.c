@@ -4,10 +4,8 @@
 #include "drivers/xbee_serial.h"
 #include <arpa/inet.h>
 
-void xbee_send_data(int fd, uint8_t * data, uint8_t * dest_mac, uint16_t dest_addr)
+void xbee_send_data(int fd, uint8_t * data, int len, uint8_t * dest_mac, uint16_t dest_addr)
 {
-	int len = strlen((char *)data);
-
 	struct xbee_dataframe * f  = malloc(sizeof(struct xbee_dataframe) + len * sizeof(uint8_t));
 	f->header.delimiter = 0x7e;
 	f->header.api = 0x10;
