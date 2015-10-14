@@ -4,12 +4,12 @@
 #include "drivers/xbee_serial.h"
 #include <arpa/inet.h>
 
-void xbee_send_data(int fd, uint8_t * data, int len, uint8_t * dest_mac, uint16_t dest_addr)
+void xbee_send_data(uint8_t * data, int len, uint8_t * dest_mac, uint16_t dest_addr)
 {
 	struct xbee_dataframe * f  = malloc(sizeof(struct xbee_dataframe) + len * sizeof(uint8_t));
 	f->header.delimiter = 0x7e;
 	f->header.api = 0x10;
-	f->header.frame_id = 0x01;
+	f->frame_id = 0x01;
 
 	int i;
 	if (!dest_mac) {
@@ -38,7 +38,7 @@ void xbee_send_data(int fd, uint8_t * data, int len, uint8_t * dest_mac, uint16_
 
 	checksum((uint8_t *) f);
 
-	xbee_write(fd, (uint8_t *) f);
+	xbee_write((uint8_t *) f);
 
 	free(f);
 }
@@ -47,7 +47,7 @@ void xbee_send_data(int fd, uint8_t * data, int len, uint8_t * dest_mac, uint16_
  * If data = 0x00 then len must be specified.
  * Otherwise data is considered as NULL
  */
-void xbee_send_atcommand(int fd, uint8_t at_cmd[2], uint8_t * data, uint16_t len)
+void xbee_send_atcommand(uint8_t at_cmd[2], uint8_t * data, uint16_t len)
 {
 	if (len == 0 && data) {
 		len = strlen((char *) data);
@@ -56,7 +56,7 @@ void xbee_send_atcommand(int fd, uint8_t at_cmd[2], uint8_t * data, uint16_t len
 	struct xbee_atcommand * f  = malloc(sizeof(struct xbee_atcommand) + len * sizeof(uint8_t));
 	f->header.delimiter = 0x7e;
 	f->header.api = 0x08;
-	f->header.frame_id = 0x01;
+	f->frame_id = 0x01;
 	
 	/* Reverse length it s like doing htons */
 	f->at.at_cmd = (uint16_t)at_cmd[1] << 8 | (uint8_t)at_cmd[0];
@@ -66,16 +66,16 @@ void xbee_send_atcommand(int fd, uint8_t at_cmd[2], uint8_t * data, uint16_t len
 
 	checksum((uint8_t *) f);
 
-	xbee_write(fd, (uint8_t *) f);
+	xbee_write((uint8_t *) f);
 
 	free(f);
 
 }
 
-void xbee_send_atwr(int fd, uint8_t at_cmd[2], uint8_t * data, uint16_t len)
+void xbee_send_atwr(uint8_t at_cmd[2], uint8_t * data, uint16_t len)
 {
-	xbee_send_atcommand(fd, at_cmd, data, len);
-	xbee_send_atcommand(fd, "WR", "\x01", 0);
+	xbee_send_atcommand(at_cmd, data, len);
+	xbee_send_atcommand("WR", "\x01", 0);
 }
 
 void checksum(uint8_t * frame)

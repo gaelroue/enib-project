@@ -7,7 +7,6 @@ struct __attribute__((__packed__)) xbee_header
 		// TO DO : cf pour htons/htonl
 	uint16_t length;/*< Longueur de la trame entre len et checksum.*/
 	uint8_t api;/*< Api mode */
-	uint8_t frame_id; /*< Id de la frame (TO DO : cf si on peut l'utiliser comme ID capteur )*/
 };
 
 struct __attribute__((__packed__)) xbee_rawframe
@@ -25,6 +24,7 @@ struct __attribute__((__packed__)) at_command
 struct __attribute__((__packed__)) xbee_atcommand
 {
 	struct xbee_header header;
+	uint8_t frame_id; /*< Id de la frame (TO DO : cf si on peut l'utiliser comme ID capteur )*/
 	struct at_command at;
 };
 
@@ -44,6 +44,7 @@ Unused bits must be set to 0.
 struct __attribute__((__packed__)) xbee_dataframe
 {
 	struct xbee_header header;
+	uint8_t frame_id; /*< Id de la frame (TO DO : cf si on peut l'utiliser comme ID capteur )*/
 	struct tx_request tx;
 
 };

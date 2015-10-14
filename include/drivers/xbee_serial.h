@@ -6,10 +6,10 @@ struct xbee_serial {
 	int fd;		//file descriptor
 };
 
-void xbee_open(struct xbee_serial * s);
-void xbee_close(struct xbee_serial * s);
-struct xbee_rawframe * xbee_read(struct xbee_serial * s);
-void xbee_write(int fd, uint8_t * frame);
+void xbee_open(char * port);
+void xbee_close(void);
+struct xbee_rawframe * xbee_read(void);
+void xbee_write(uint8_t * frame);
 void xbee_print_frame(uint8_t * frame);
 
 #endif

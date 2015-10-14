@@ -5,8 +5,9 @@
 #include <fcntl.h>
 #include <poll.h>
 
+static struct xbee_serial * xbee;
 
-void xbee_open(struct xbee_serial * s)
+static void xbee_open_serial(struct xbee_serial * s)
 {
 	struct termios tty;
 
@@ -47,7 +48,14 @@ void xbee_open(struct xbee_serial * s)
 
 }
 
-void xbee_close(struct xbee_serial * s)
+void xbee_open(char * port)
+{
+	xbee = malloc(sizeof(struct xbee_serial));
+	xbee->device = port;
+	xbee_open_serial(xbee);
+}
+
+static void xbee_close_serial(struct xbee_serial * s)
 {
 	if (close(s->fd) != 0) {
 		perror(s->device);
@@ -55,10 +63,15 @@ void xbee_close(struct xbee_serial * s)
 	}
 }
 
+void xbee_close(void)
+{
+	xbee_close_serial(xbee);
+}
+
 static void xbee_get_header(int fd, struct xbee_header * h)
 {
-	uint8_t buf[5];
-	if (read(fd, buf, 5) < 1) {
+	uint8_t buf[4];
+	if (read(fd, buf, 4) < 1) {
 		perror("Error getting frame header");
 		return;
 	}
@@ -66,8 +79,6 @@ static void xbee_get_header(int fd, struct xbee_header * h)
 	h->delimiter = buf[0];
 	h->length = htons(((uint16_t)buf[1] << 8) | buf[2]);
 	h->api = buf[3];
-	h->frame_id = buf[4];
-
 }
 
 static void xbee_get_rawdata(int fd, uint8_t * data, uint16_t length)
@@ -78,7 +89,7 @@ static void xbee_get_rawdata(int fd, uint8_t * data, uint16_t length)
 	}
 }
 
-struct xbee_rawframe * xbee_read(struct xbee_serial * s)
+static struct xbee_rawframe * xbee_read_serial(struct xbee_serial * s)
 {
 	struct pollfd fds;
 	int timeout_msecs = 500;
@@ -104,15 +115,20 @@ struct xbee_rawframe * xbee_read(struct xbee_serial * s)
 		assert(frame);
 		assert(frame->header.length);
 
-		/* length + 1 to get checksum */
-		frame = realloc(frame, sizeof(struct xbee_rawframe) + (frame->header.length -1) * sizeof(uint8_t));
-		xbee_get_rawdata(s->fd, frame->rawdata, frame->header.length - 1);
+		/* length to get checksum */
+		frame = realloc(frame, sizeof(struct xbee_rawframe) + (frame->header.length) * sizeof(uint8_t));
+		xbee_get_rawdata(s->fd, frame->rawdata, frame->header.length);
 	}
 
 	return frame;
 }
 
-void xbee_write(int fd, uint8_t * frame)
+struct xbee_rawframe * xbee_read(void)
+{
+	return xbee_read_serial(xbee);
+}
+
+static void xbee_write_serial(int fd, uint8_t * frame)
 {
 	uint16_t len = ((uint16_t)frame[1] << 8) + (uint16_t)frame[2];
 
@@ -122,6 +138,11 @@ void xbee_write(int fd, uint8_t * frame)
 		frame++;
 	}
 
+}
+
+void xbee_write(uint8_t * frame)
+{
+	xbee_write_serial(xbee->fd, frame);
 }
 
 void xbee_print_frame(uint8_t * frame)
