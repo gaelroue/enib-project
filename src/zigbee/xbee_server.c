@@ -5,14 +5,13 @@
 
 void xbee_start_server(void)
 {
+	struct xbee_rawframe * frame = malloc(sizeof(struct xbee_rawframe));
 	for(;;) {
-		struct xbee_rawframe * frame = xbee_read();
-
-		if (!frame) {
-			free(frame);
+		if (xbee_read(frame) == -1) {
 			continue;
 		}
 
-		free(frame);
+		xbee_print_frame((uint8_t *)frame);
 	}
+	free(frame);
 }

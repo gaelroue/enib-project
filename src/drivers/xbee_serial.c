@@ -34,7 +34,7 @@ static void xbee_open_serial(struct xbee_serial * s)
 	tty.c_cflag &= ~CSIZE;
 	tty.c_cflag |= CS8;
 
-	tty.c_cc[VMIN]  = 50;
+	tty.c_cc[VMIN]  = 100;
 	tty.c_cc[VTIME] = 10;
 
 	// Enable the receiver and set local mode...
@@ -68,7 +68,7 @@ void xbee_close(void)
 	xbee_close_serial(xbee);
 }
 
-static void xbee_get_header(int fd, struct xbee_header * h)
+static int xbee_get_header(int fd, struct xbee_header * h)
 {
 	uint8_t buf[4];
 	if (read(fd, buf, 4) < 1) {
@@ -76,6 +76,9 @@ static void xbee_get_header(int fd, struct xbee_header * h)
 		return;
 	}
 
+	if (buf[0] != 0x7E) {
+		return -1;
+	}
 	h->delimiter = buf[0];
 	h->length = htons(((uint16_t)buf[1] << 8) | buf[2]);
 	h->api = buf[3];
@@ -89,7 +92,7 @@ static void xbee_get_rawdata(int fd, uint8_t * data, uint16_t length)
 	}
 }
 
-static struct xbee_rawframe * xbee_read_serial(struct xbee_serial * s)
+static int xbee_read_serial(struct xbee_serial * s, struct xbee_rawframe * frame)
 {
 	struct pollfd fds;
 	int timeout_msecs = 500;
@@ -98,19 +101,19 @@ static struct xbee_rawframe * xbee_read_serial(struct xbee_serial * s)
 	fds.fd = s->fd;
 	fds.events = POLLIN;
 
-	int i;
-
-	ret = poll(&fds, 1, timeout_msecs);
+	do {
+		ret = poll(&fds, 1, timeout_msecs);
+	} while (ret == 0);
 
 	if (ret < 0) {
 	/* An event on one of the fds has occurred. */
 		return;
 	}
 
-	struct xbee_rawframe * frame = malloc(sizeof(struct xbee_rawframe));
-
 	if (fds.revents & POLLIN ) {
-		xbee_get_header(s->fd, &frame->header);
+		if (xbee_get_header(s->fd, &frame->header) == -1) {
+			return -1;
+		}
 
 		assert(frame);
 		assert(frame->header.length);
@@ -120,12 +123,12 @@ static struct xbee_rawframe * xbee_read_serial(struct xbee_serial * s)
 		xbee_get_rawdata(s->fd, frame->rawdata, frame->header.length);
 	}
 
-	return frame;
+	return 0;
 }
 
-struct xbee_rawframe * xbee_read(void)
+int xbee_read(struct xbee_rawframe * frame)
 {
-	return xbee_read_serial(xbee);
+	return xbee_read_serial(xbee, frame);
 }
 
 static void xbee_write_serial(int fd, uint8_t * frame)
@@ -151,7 +154,8 @@ void xbee_print_frame(uint8_t * frame)
 
 	uint16_t i;
 	for (i = 0; i < 3 + len + 1; i++) {
-		printf("%x\n", frame[i]);
+		printf("%x ", frame[i]);
 	}
+	printf("\n");
 
 }

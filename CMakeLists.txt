@@ -5,8 +5,8 @@ set(MAIN src/main.c)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-#set(TEST test/sensor.c)
-set(TEST test/serial.c)
+set(TEST test/server.c)
+#set(TEST test/serial.c)
 
 project($PRJ)
 
