@@ -3,7 +3,7 @@
 #include "zigbee/xbee_struct.h"
 #include "zigbee/xbee_client.h"
 
-#define PORT "/dev/ttyUSB1"
+#define PORT "/dev/ttyUSB0"
 
 int main(int argc, char ** argv)
 {
@@ -22,7 +22,7 @@ int main(int argc, char ** argv)
 	//at->at_cmd = "MY";
 	//at->at_cmd = 0x4D59;
 
-	//xbee_send_atcommand("MY", "", 0);
+	xbee_send_atcommand("MY", "", 0);
 	//xbee_send_atwr(xbee->fd, "JN", "\x01", 0);
 
 	struct xbee_rawframe * frame = malloc(sizeof(struct xbee_rawframe));

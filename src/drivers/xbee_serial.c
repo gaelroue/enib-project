@@ -80,7 +80,7 @@ static int xbee_get_header(int fd, struct xbee_header * h)
 		return -1;
 	}
 	h->delimiter = buf[0];
-	h->length = htons(((uint16_t)buf[1] << 8) | buf[2]);
+	h->length = ((uint16_t)buf[2] << 8) | buf[1];
 	h->api = buf[3];
 }
 

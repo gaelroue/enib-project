@@ -59,4 +59,17 @@ All other bits must be set to zero.*/
 	struct at_command at;
 };
 
+// frame 0x95
+struct __attribute__((__packed__)) xbee_idframe
+{
+	struct xbee_header header;
+	uint8_t sender_mac[8]; /*< Adresse MAC de destination */
+	uint16_t sender_addr; /*< Adresse dynamique sur le réseau*/
+	uint8_t options;
+	uint16_t remote_addr;
+	uint8_t remote_mac[8];
+	uint8_t * name; 
+	uint16_t remote_parent_addr;
+};
+
 #endif
