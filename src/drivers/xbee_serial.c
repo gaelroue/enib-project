@@ -5,9 +5,9 @@
 #include <fcntl.h>
 #include <poll.h>
 
-static struct xbee_serial * xbee;
+STATIC struct xbee_serial * xbee;
 
-static void xbee_open_serial(struct xbee_serial * s)
+STATIC void xbee_open_serial(struct xbee_serial * s)
 {
 	struct termios tty;
 
@@ -55,7 +55,7 @@ void xbee_open(char * port)
 	xbee_open_serial(xbee);
 }
 
-static void xbee_close_serial(struct xbee_serial * s)
+STATIC void xbee_close_serial(struct xbee_serial * s)
 {
 	if (close(s->fd) != 0) {
 		perror(s->device);
@@ -68,7 +68,7 @@ void xbee_close(void)
 	xbee_close_serial(xbee);
 }
 
-static int xbee_get_header(int fd, struct xbee_header * h)
+STATIC int xbee_get_header(int fd, struct xbee_header * h)
 {
 	uint8_t buf[4];
 	if (read(fd, buf, 4) < 1) {
@@ -84,7 +84,7 @@ static int xbee_get_header(int fd, struct xbee_header * h)
 	h->api = buf[3];
 }
 
-static void xbee_get_rawdata(int fd, uint8_t * data, uint16_t length)
+STATIC void xbee_get_rawdata(int fd, uint8_t * data, uint16_t length)
 {
 	if (read(fd, data, length) < 1) {
 		perror("Error getting frame data");
@@ -92,7 +92,7 @@ static void xbee_get_rawdata(int fd, uint8_t * data, uint16_t length)
 	}
 }
 
-static int xbee_read_serial(struct xbee_serial * s, struct xbee_rawframe * frame)
+STATIC int xbee_read_serial(struct xbee_serial * s, struct xbee_rawframe * frame)
 {
 	struct pollfd fds;
 	int timeout_msecs = 500;
@@ -131,7 +131,7 @@ int xbee_read(struct xbee_rawframe * frame)
 	return xbee_read_serial(xbee, frame);
 }
 
-static void xbee_write_serial(int fd, uint8_t * frame)
+STATIC void xbee_write_serial(int fd, uint8_t * frame)
 {
 	uint16_t len = ((uint16_t)frame[1] << 8) + (uint16_t)frame[2];
 

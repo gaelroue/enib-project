@@ -5,7 +5,7 @@ set(MAIN src/main.c)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-set(TEST test/server_port.c)
+set(TEST test/send.c)
 
 project($PRJ)
 

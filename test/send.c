@@ -16,13 +16,14 @@ main(int argc,
 {
 
 	xbee_open((char *)PORT);
-	uint8_t data[1];
+	uint8_t data[2];
 	uint8_t i;
 	while(1){
 		sleep(3);
 		printf("%x\n", i);
-		data[0] = i++;
-		xbee_send_data(data, 1, 0, 0);
+		data[0] =i++;
+		data[1] =i++;
+		xbee_send_data(data, 2, 0, 0);
 	}
 	/* Closing file descriptor */
 	xbee_close();
