@@ -24,7 +24,7 @@ void xbee_send_data(uint8_t * data, int len, uint8_t * dest_mac, uint16_t dest_a
 	}
 
 	if (!dest_addr) {
-		dest_addr = 0xFFFF;
+		dest_addr = 0xFFFE;
 	}
 
 	f->tx.dest_addr = dest_addr;

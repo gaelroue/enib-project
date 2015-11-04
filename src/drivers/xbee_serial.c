@@ -37,9 +37,10 @@ static void xbee_open_serial(struct xbee_serial * s)
 	tty.c_cc[VMIN]  = 100;
 	tty.c_cc[VTIME] = 10;
 
+
 	// Enable the receiver and set local mode...
-	//tty.c_cflag |= (CLOCAL | CREAD);
-	tty.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN);
+	//tty.c_cflag |= (CLOCAL | CREAD);  | ICANON 
+	tty.c_lflag &= ~(ECHO | ECHONL | IEXTEN);
 
 	/* Apply new configuration*/
 	if (tcsetattr(s->fd, TCSANOW, &tty) == -1) {

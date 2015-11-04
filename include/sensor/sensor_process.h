@@ -15,6 +15,7 @@
 
 
 
+
 /*****************************
 * sensor_init_process
 * Initialise le process des capteurs.
@@ -24,7 +25,7 @@ void sensor_init_process(void);
 * sensor_get_new_id
 * return : new_id - uint16_t
 *******************************/
-uint16_t sensor_get_new_id(void);
+uint16_t sensor_get_new_id(uint16_t ip);
 /*****************************
 *  sensor_parse_inform
 * in : data  - uint8_t *

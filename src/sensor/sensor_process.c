@@ -21,7 +21,7 @@ void sensor_init_process(void)
 	//}
 }
 
-uint16_t sensor_get_new_id(void)
+uint16_t sensor_get_new_id(uint16_t ip)
 {
 	uint8_t i;
 	if(num_sensor >= LIMIT_SENSOR){
@@ -30,6 +30,7 @@ uint16_t sensor_get_new_id(void)
 	for(i = 0; i < LIMIT_SENSOR; i++){
 		if(sensor_tab[i].id ==  0){
 			sensor_tab[i].id = num_sensor++;
+			sensor_tab[i].ip = ip;
 			break;
 		}
 	}

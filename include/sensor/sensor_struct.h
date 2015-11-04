@@ -10,6 +10,7 @@ struct sensor
 	int value_max; /*< Value maximal que le capteur peut transmettre. */
 	uint8_t refresh_time; /*< 0 si c'est une demande de la BB ou 1 - 255 en secondes pour que le capteur renvois les infos. */
 	int data; /*<  Donnée du capteur */
+	uint16_t ip;
 };
 
 #endif

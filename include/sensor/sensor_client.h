@@ -42,7 +42,7 @@ int remove_sensor(uint8_t id);
 		len - uint8_t
 * return errno - int 
 ******************************/
-int rawdata_sensor(uint8_t * data, uint8_t len);
+int rawdata_sensor(uint8_t * data, uint8_t len,uint16_t ip);
 
 
 #endif
