@@ -8,14 +8,14 @@
 #include "sensor/sensor_struct.h"
 
 
-#define PORT "/dev/ttyUSB0"
 
-	int
-main(int argc,
-		char **argv)
+int main(int argc, char **argv)
 {
+	if (argc < 2) {
+		printf("use : ./prg PORT\n");
+	}
+	xbee_open((char *)argv[1]);
 
-	xbee_open((char *)PORT);
 	uint8_t data[2];
 	uint8_t i;
 	while(1){

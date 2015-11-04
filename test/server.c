@@ -3,11 +3,13 @@
 #include "zigbee/xbee_struct.h"
 #include "zigbee/xbee_client.h"
 
-#define PORT "/dev/ttyUSB1"
 
 int main(int argc, char ** argv)
 {
-	xbee_open((char *)PORT);
+	if (argc < 2) {
+		printf("use : ./prg PORT\n");
+	}
+	xbee_open((char *)argv[1]);
 
 	xbee_start_server();
 
