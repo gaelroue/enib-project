@@ -59,7 +59,11 @@ All other bits must be set to zero.*/
 	struct at_command at;
 };
 
-// frame 0x95
+/*
+ * frame 0x95
+ * name length is not block so the last field (remote_addr) isn t;
+ * Not a problem we just need sender information
+ */
 struct __attribute__((__packed__)) xbee_idframe
 {
 	struct xbee_header header;
@@ -68,8 +72,7 @@ struct __attribute__((__packed__)) xbee_idframe
 	uint8_t options;
 	uint16_t remote_addr;
 	uint8_t remote_mac[8];
-	uint8_t * name; 
-	uint16_t remote_parent_addr;
+	uint8_t name_and_remote_addr[];
 };
 
 #endif

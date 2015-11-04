@@ -10,21 +10,28 @@ static void * xbee_frame_parser(void * data)
 	//We protect the frame while it s copying
 	pthread_mutex_lock(&mtx);
 	struct xbee_rawframe * tmp = (struct xbee_rawframe *)data;
-	struct xbee_rawframe * frame = malloc(3 + tmp->header.length +1);
-	memcpy(frame, tmp, 3 + tmp->header.length +1);
-	pthread_mutex_unlock(&mtx);
 
-	sleep(4);
-	xbee_print_frame((uint8_t *)frame);
+	/*
+	 * Switch on api type
+	 * IMPORTANT : Don't forget to to unlock mutex once you get your frame
+	 */
+	switch(tmp->header.api) {
+		case 0x95: {
+				struct xbee_idframe * frame = malloc(3 + tmp->header.length +1);
+				memcpy(frame, tmp, 3 + tmp->header.length +1);
+				pthread_mutex_unlock(&mtx);
 
-	switch(frame->header.api) {
-		case 0x90:
-			printf("data\n");
-		break;
-		case 0x95:
-			printf("connexion\n");
-		break;
+				free(frame);
+			}
+		case 0x90: {
+				struct xbee_dataframe * frame = malloc(3 + tmp->header.length +1);
+				memcpy(frame, tmp, 3 + tmp->header.length +1);
+				pthread_mutex_unlock(&mtx);
+
+				free(frame);
+			}
 		default:
+			pthread_mutex_unlock(&mtx);
 		break;
 	}
 }
