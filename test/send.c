@@ -20,8 +20,9 @@ main(int argc,
 	uint8_t i;
 	while(1){
 		sleep(3);
-		printf("%x\n", i);
+		printf("%x ", i);
 		data[0] =i++;
+		printf("%x\n", i);
 		data[1] =i++;
 		xbee_send_data(data, 2, 0, 0);
 	}

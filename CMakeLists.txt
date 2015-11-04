@@ -5,7 +5,7 @@ set(MAIN src/main.c)
 
 set(CMAKE_BUILD_TYPE Debug)
 
-set(TEST test/send.c)
+set(TEST test/server.c)
 
 project($PRJ)
 
@@ -19,4 +19,4 @@ add_subdirectory(src/sensor)
 
 #add_executable(${PRJ} ${MAIN})
 add_executable(${PRJ} ${TEST})
-target_link_libraries(${PRJ} drivers zigbee sensor)
+target_link_libraries(${PRJ} drivers zigbee sensor pthread)
