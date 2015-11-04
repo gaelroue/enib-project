@@ -1,6 +1,7 @@
 #include "base.h"
 #include "zigbee/xbee_struct.h"
 #include "drivers/xbee_serial.h"
+#include "sensor/sensor_client.h"
 #include <pthread.h>
 
 pthread_mutex_t mtx;
@@ -20,14 +21,19 @@ static void * xbee_frame_parser(void * data)
 				struct xbee_idframe * frame = malloc(3 + tmp->header.length +1);
 				memcpy(frame, tmp, 3 + tmp->header.length +1);
 				pthread_mutex_unlock(&mtx);
-
+				uint8_t send_data[3];
+				send_data[0] = 0;
+				send_data[1] = 0;
+				send_data[2] = START_COMMUNICATION;
+				xbee_send_data(START_COMMUNICATION, 3, frame->sender_mac, frame->sender_addr);
 				free(frame);
 			}
 		case 0x90: {
 				struct xbee_dataframe * frame = malloc(3 + tmp->header.length +1);
 				memcpy(frame, tmp, 3 + tmp->header.length +1);
 				pthread_mutex_unlock(&mtx);
-
+				uint8_t ip[2] = {(frame->tx.dest_addr >> 8)&0xFF, frame->tx.dest_addr&0xFF};
+				rawdata_sensor(frame->tx.data, tmp->header.length - 14, ip);
 				free(frame);
 			}
 		default:

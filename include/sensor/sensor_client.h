@@ -10,7 +10,7 @@
 #define ASK_DATA			0x02 /*< Demande de donnée non périodique*/
 	#define ASK_DATA_LEN		0x03
 #define ASK_ALIVE			0x22 /*< Gestion d'erreur, cf si le distant est vivant*/
-
+#define START_COMMUNICATION 0xFB /*< Debut d'une communication entre BB et fpga */
 
 
 /**************************** 
