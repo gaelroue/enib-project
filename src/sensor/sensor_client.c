@@ -146,7 +146,8 @@ uint8_t get_data_from_sensor(uint16_t id)
 	#ifdef __DEBUG__
 		printf(" Demande de données pour le capteur n°%d \n", id );
 		printf("data : ");
-		for(uint8_t i = 0; i < ASK_DATA_LEN; i++){
+		uint8_t i;
+		for(i = 0; i < ASK_DATA_LEN; i++){
 			printf(" %x", data[i]);
 		}
 		printf("\n");
