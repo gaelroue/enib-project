@@ -2,6 +2,7 @@
 #include "zigbee/xbee_struct.h"
 #include "drivers/xbee_serial.h"
 #include "sensor/sensor_client.h"
+#include "drivers/semaphore.h"
 #include <pthread.h>
 
 pthread_mutex_t mtx;
@@ -47,6 +48,7 @@ static void * xbee_frame_parser(void * data)
 int main(void)
 {
 	sensor_init_client();
+	init_semaphore();
 	for(;;) {
 		struct xbee_rawframe * frame = malloc(sizeof(struct xbee_rawframe));
 		printf("DEBUT main\n");

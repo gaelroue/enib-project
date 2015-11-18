@@ -5,10 +5,11 @@
 #include <sys/sem.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "drivers/semaphore.h"
 #include "sensor/sensor_struct.h"
 #include "sensor/sensor_process.h"
 #include "base.h"
-#include "drivers/semaphore.h"
+
 
 int semaphores;
 struct sembuf manipSemaphores;
