@@ -58,6 +58,7 @@ int rawdata_sensor(uint8_t * data, uint8_t len, uint8_t * ip)
 		 int data_tmp;
 		//uint16_t id = (uint16_t)data[0]<< 8 | data[1]; 
 	switch(data[OFFSET_ASK]){
+		#ifdef __BB__
 		case ASK_NEW_ID:
 			id = sensor_get_new_id(ip);
 			get_sensor_struct(id)->type = data[OFFSET_ASK+1];
@@ -73,7 +74,7 @@ int rawdata_sensor(uint8_t * data, uint8_t len, uint8_t * ip)
 		// On a nos informations on informe le capteur de son ID et taux de rafraîchissement :
 			data[SENSOR_IDH] = id>>8&0xFF;
 			data[SENSOR_IDL] = id&0xFF;
-			data[OFFSET_ASK] = ASK_GIVE_ID;
+			data[OFFSET_ASK] = GIVE_ID;
 			memcpy(&data[OFFSET_ASK+1], refresh_time, 4);
 			// ***************** SEND ************************
 			#ifdef __DEBUG__
@@ -88,8 +89,19 @@ int rawdata_sensor(uint8_t * data, uint8_t len, uint8_t * ip)
 			printf("--- END nouvelle ID ---\n");
 
 			#endif
-			//xbee_send_data(data, ASK_GIVE_ID_LEN, 0, ip);
+			xbee_send_data(data, GIVE_ID_LEN, 0, ip);
 			break;
+		#endif
+		#ifdef __FPGA__
+		case GIVE_ID:
+			// On note l'ID dans la table (cf: table)
+			#ifdef __DEBUG__
+				printf(" ID reçu : %d\n", ((uint16_t)data[SENSOR_IDH] << 8 | data[SENSOR_IDL]));
+				//printf("%s\n", );
+			#endif
+
+			break;
+		#endif
 		case DATA: 
 
 			// On divise les données : 

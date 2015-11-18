@@ -1,6 +1,7 @@
 #include "base.h"
 #include "zigbee/xbee_struct.h"
 #include "drivers/xbee_serial.h"
+
 #include "sensor/sensor_client.h"
 #include <pthread.h>
 
@@ -49,7 +50,7 @@ void xbee_start_server(void)
 		if (xbee_read(frame) == -1) {
 			continue;
 		}
-
+		xbee_print_frame((uint8_t *)frame);
 		pthread_t th;
 		if (pthread_create(&th, NULL, xbee_frame_parser, frame)) {
 			printf("Error creating thread\n");

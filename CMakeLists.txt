@@ -12,9 +12,10 @@ set(CMAKE_BUILD_TYPE Debug)
 #set(TEST test/server.c)
 #set(TEST test/send.c)
 #set(TEST test/sensor.c)
-set(TEST test/fpga.c)
+#set(TEST test/fpga.c)
 #set(TEST test/time.c)
 #set(TEST test/memoire_partage.c)
+set(TEST test/server_poll.c)
 
 project($PRJ)
 
@@ -28,4 +29,4 @@ add_subdirectory(src/sensor)
 
 #add_executable(${PRJ} ${MAIN})
 add_executable(${PRJ} ${TEST})
-target_link_libraries(${PRJ} drivers zigbee sensor pthread)
+target_link_libraries(${PRJ} drivers zigbee sensor pthread crypto ssl)

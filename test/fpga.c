@@ -3,16 +3,18 @@
 #include "sensor/sensor_struct.h"
 #include "drivers/timer.h"
 #include "drivers/semaphore.h"
-
+#include "drivers/xbee_serial.h"
+#include "zigbee/xbee_client.h"
 
 #include <termios.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <ctype.h>
-void test_sig(void)
-{
-	printf(" Test \n");
-}
+
+
+#define PORT "/dev/ttyUSB0"
+
+
  // Fonction pour permettre de quitter le programme proprement.
 int kbhit(void)
 {
@@ -43,7 +45,8 @@ int main(int argc, char ** argv)
 {
 
 	sensor_init_client();
-	init_timer(5,0);
+	//init_timer(5,0);
+	xbee_open((char *)PORT);
 /************* EXEMPLE *******************/
 	// On a 2 capteurs sur la carte 
 	//struct sensor sensor_board[2];
@@ -52,18 +55,30 @@ int main(int argc, char ** argv)
 	uint8_t * data =  "\x00\x00\xFE\x01";
 	uint8_t len = 4;
 	uint8_t ip[2] = {0, 0};
-	rawdata_sensor(data, len, ip);
-
-	uint8_t * data_2 =  "\x00\x01\xFC\xF2\x01\x01\x01";
-	uint8_t len_2 = 4;
-	uint8_t ip_2[2] = {0, 0};
-	rawdata_sensor(data_2, len_2, ip_2);
-	#ifdef __DEBUG__
-		printf("PID : %d \n", getpid());
-	#endif
+	//rawdata_sensor(data, len, ip);
+	
+	xbee_send_data(data, len, 0, 0);
+	
+	// uint8_t * data_2 =  "\x00\x01\xFC\xF2\x01\x01\x01";
+	// uint8_t len_2 = 4;
+	// uint8_t ip_2[2] = {0, 0};
+	// rawdata_sensor(data_2, len_2, ip_2);
+	// #ifdef __DEBUG__
+	// 	printf("PID : %d \n", getpid());
+	// #endif
 		//signal(1024, test_sig);
-	while(!kbhit());
+	struct xbee_rawframe * frame = malloc(sizeof(struct xbee_rawframe));
+	int i;
+	while(!kbhit()){
+		printf(" i  : %d\n", i++);
+		if (xbee_read(frame) == -1) {
+			continue;
+		}
+		xbee_print_frame((uint8_t*)frame);
+
+	}
 	sensor_close_client();
 	remove_semaphore();
+	xbee_close();
 	return 0;
 }

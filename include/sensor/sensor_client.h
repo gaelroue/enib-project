@@ -4,8 +4,8 @@
 #define OFFSET_ASK			0x02
 // Code d'identification de trame
 #define ASK_NEW_ID 			0xFE /*< Demande de nouvelle ID */
-#define ASK_GIVE_ID			0xFD /*< Donne l'ID accompagner du taux de rafraîchissement*/
-	#define ASK_GIVE_ID_LEN 0x07
+#define GIVE_ID			0xFD /*< Donne l'ID accompagner du taux de rafraîchissement*/
+	#define GIVE_ID_LEN 0x07
 #define DATA				0xFC /*< Transfert de donnée*/
 #define ASK_DATA			0x02 /*< Demande de donnée non périodique*/
 	#define ASK_DATA_LEN		0x03
