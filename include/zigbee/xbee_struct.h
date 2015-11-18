@@ -75,4 +75,17 @@ struct __attribute__((__packed__)) xbee_idframe
 	uint8_t name_and_remote_addr[];
 };
 
+struct __attribute__((__packed__)) xbee_rcv_data
+{
+	       struct xbee_header header;
+	       uint8_t dest_mac[8]; /*< Adresse MAC de destination */
+	       uint16_t dest_addr; /*< Adresse dynamique sur le réseau*/
+	       uint8_t options; /*<Transmit options bitfield.
+				   Unused bits must be set to 0.
+				   0x01 - Disable retries and route repair
+				   0x20 - Enable APS encryption (if EE=1) Enabling APS encryption decreases the maximum number of RF payload bytes by 4 (below the value reported by NP).
+				   0x40 - Packet was sent from an end device (if known) */
+	       uint8_t data[]; /*< pointeur sur le premier élément des données */
+};
+
 #endif

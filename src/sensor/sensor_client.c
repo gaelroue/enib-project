@@ -8,13 +8,12 @@
 #include "drivers/semaphore.h"
 
 
-
-
 void sensor_init_client(void)
 {
 	sensor_init_process();
 	init_semaphore();
 }
+
 void sensor_close_client(void)
 {
 	remove_shm();
