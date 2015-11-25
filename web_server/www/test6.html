@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Atmel Corporation - Software Examples</title>
+  <link rel="stylesheet" type="text/css" href="../style.css" />
+</head>
+<body>
+<div id="body">
+<h1>AT91SAM9261-EK development board</h1>
+<div id="banner"></div>
+<div id="contents">
+  <table>
+  <tr><th>Control ds7 led</th></tr>
+  <tr><td>
+    <input type="checkbox" id="tLed" onclick="do_onclick(this, document.getElementById('tLedLabel'))"><span id="tLedLabel"> Led ds7 éteinte</span>
+  </td></tr>
+  </table>
+</div>
+</div>
+<script>
+function do_onclick(led, label)
+{
+  // new XMLHttpRequest
+  var xmlhttp=new XMLHttpRequest();
+  
+  // register callback : function to be called when we receive the response
+  xmlhttp.onreadystatechange=function() {
+    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+      label.innerHTML=xmlhttp.responseText;
+    }
+  }
+  
+  // send request and poll for asynchronous response
+  xmlhttp.open("GET","cgi-bin/test6.lua?ds7="+led.checked,true);
+  xmlhttp.send();
+}
+
+// initial checkbox state, reflect this state on the target
+var led=document.getElementById("tLed");
+var label=document.getElementById("tLedLabel");
+
+led.checked=false;
+do_onclick(led, label);
+  
+</script>
+</body>
+</html>
