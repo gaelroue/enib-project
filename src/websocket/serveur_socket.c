@@ -72,10 +72,6 @@ void socket_server(void)
 			// TO DO : Update the data capteur ;)
 			socket_server_check_sensor(fds, nfds);
 
-			char tmp[100];
-			sprintf(tmp, "{ \"type\":\"workload\", \"value\":%d }", 12);
-			for (int k=1;k<nfds;k++) write(fds[k].fd, tmp, strlen(tmp));
-
 		}	
 		if (fds[0].revents == POLLIN) {
 			int 				client;			// client socket descriptor
@@ -118,7 +114,8 @@ void socket_server(void)
 					close(fds[i].fd);
 					fds[i].fd = -1;
 					/* compress the fds array */
-					for (int j=i ; j<nfds-1 ; j++) fds[j].fd = fds[j+1].fd;
+					int j;
+					for (j=i ; j<nfds-1 ; j++) fds[j].fd = fds[j+1].fd;
 					nfds--;
 					i--;
 				} else {	

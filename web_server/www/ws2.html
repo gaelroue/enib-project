@@ -25,31 +25,26 @@
     }
     function init() {
         ws = new WebSocket('ws://127.0.0.1/board');
-        var listElement = document.createElement("ul");
         ws.onopen = function(e) {
             appendTxtNode('WebSocket opened');
         };
-        ws.onmessage = function(evt) {
-        	//var content=document.getElementById("content");
-        	var msg = JSON.parse(evt.data);
+        ws.onmessage = function(msg) {
+        	ul = document.getElementById('content.ul');
+		while (ul.hasChildNodes()) {
+			ul.removeChild(ul.lastChild);
+		}
 
-         
-          content.appendChild(listElement);
+		data = JSON.parse(msg.data);
 
-          //document.write(msg); 
-          for(i = 0; i < msg.nb_sensor; i++ )
-          {
-              var listItem = document.createElement("li");
-            listItem.innerHTML="<li id = "+i+">type : "+msg.sensor[i].type+"<br \>  value : "+msg.sensor[i].value+"<br \> refresh :"+msg.sensor[i].refresh+"</li>";
-            listElement.appendChild(listItem);
-          }
-   
+		for (i = 0; i < data.nb_sensor; i++) {
+			li = document.createElement('li');
+			li.innerHTML="Sensor id : "+ data.sensor[i].id;
+			ul.appendChild(li);
+		}
         };
         ws.onclose = function(e) {
             appendTxtNode('WebSocket closed');
         };
-    
-    	//var gauge=new Gauge('gauge');
     }
   </script>
 </head>
@@ -58,17 +53,9 @@
   <div id="banner"></div>
   <div id="contents">
     <table>
-    <tr><th>Control ds7 led</th></tr>
-    <tr><td>
-      <input id="sendmsg" type="text" onChange="doSend()"></input>
-      <button onClick="doSend()">Send</button>
-    </td></tr>
-    </table>
-    <table>
     <tr><th>show cpu workload (%)</th></tr>
     <tr><td>
-      <div id="content"></div>
-      <div><canvas id="gauge" width="300" height="300"></div>
+		    <div id="content"><ul id="content.ul"></ul></div>
     </td></tr>
     <tr><th>websocket log</th></tr>
     <tr><td>

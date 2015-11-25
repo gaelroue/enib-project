@@ -63,7 +63,8 @@ int remove_semaphore(int sem)
 
 void init_semaphore(int sem)
 {
-  for (int i = 0; i < LIMIT_SEMAPHORE; i++){
+  int i;
+  for (i = 0; i < LIMIT_SEMAPHORE; i++){
       semaphores[i].semaphore = 0;
   }
 }

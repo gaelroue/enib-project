@@ -2,6 +2,9 @@
 #include "websocket/socket_function.h"
 #include "sensor/sensor_struct.h"
 #include "drivers/semaphore.h"
+#include <time.h>
+#include <stdlib.h>
+
 /***************************************************************************
  * socket utils
  ***************************************************************************/
@@ -114,8 +117,9 @@ void let_memory_share(void * attache_memory)
 
 void socket_server_check_sensor(struct pollfd * fds, int nfds)
 {
+	srand(time(NULL));
   
-  nb_sensor = 2; // TO DO : récupérer le nombre de capteur connecter.
+  nb_sensor = 4; // TO DO : récupérer le nombre de capteur connecter.
 
   char buf[500]; 
 
@@ -123,19 +127,20 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
   sprintf(buf, "{ \"nb_sensor\" : %d, \
                     \"sensor\" : [ \n", nb_sensor);
 
-  int i;
-  char tmp_buf[100];
-  for(i = 0; i < nb_sensor; i++){
-    int type = 12 +i;
-    int value = 5 +i;
-    int refresh = 1+i;
-    if(i+1 == nb_sensor){
-      sprintf(tmp_buf, "{ \"type\" : %d,\n \"value\":%d,\n \"refresh\":%d }", type, value, refresh);
-    }else{
-      sprintf(tmp_buf, "{ \"type\" : %d, \n \"value\":%d,\n \"refresh\":%d },", type, value, refresh);  
-    }
-    strcat(buf,tmp_buf);
-  }
+	int i;
+	char tmp_buf[100];
+	for(i = 0; i < nb_sensor; i++){
+		int type = rand() % 5;
+		int id = rand() % 10;
+		int value = rand() % 50;
+		int refresh = 1+i;
+		if(i+1 == nb_sensor){
+			sprintf(tmp_buf, "{\"id\" : %d, \"type\" : %d,\n \"value\":%d,\n \"refresh\":%d }", type, value, refresh);
+		}else{
+			sprintf(tmp_buf, "{\"id\" : %d, \"type\" : %d, \n \"value\":%d,\n \"refresh\":%d },", type, value, refresh);  
+		}
+		strcat(buf,tmp_buf);
+	}
 
   
   sprintf(tmp_buf, "\n]} \n");
@@ -143,7 +148,8 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
   #ifdef __DEBUG__
     printf("buf : %s \n", buf);
   #endif
-  for (int k=1;k<nfds;k++) write(fds[k].fd, buf, strlen(buf));
+  int k; 
+  for (k=1;k<nfds;k++) write(fds[k].fd, buf, strlen(buf));
   // puis parcourir les capteurs, former le JSON et l'envoyer au socket.
   // ATTENTION ndfs commence forcément à 1
 /*
