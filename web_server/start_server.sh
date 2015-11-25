@@ -9,7 +9,7 @@ sudo ps -ef | grep lighttpd | grep -v grep | awk '{print $2}' | xargs kill
 echo ""
 echo "___________________LightTPD___________________"
 echo ""
-sudo lighttpd -f /home/sotchi/Documents/ENIB/S9/enib_project/web_server/lighttpd.conf
+sudo lighttpd -f /home/gael/Documents/projects/enib-project/web_server/lighttpd.conf
 echo ""
 echo "__________________Websocket___________________"
 echo ""
