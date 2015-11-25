@@ -10,5 +10,5 @@ int get_semaphore(int key);
 int take_semaphore(int sem);
 int give_semaphore(int sem);
 int remove_semaphore(int sem);
-void init_semaphore(int sem);
+void init_semaphore();
 #endif

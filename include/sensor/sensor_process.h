@@ -66,6 +66,10 @@ void update_ip(uint16_t id, uint8_t * ip);
 
 void * beagle_check_sensor(void * data);
 
+void sensor_ask_id(uint8_t * data, uint16_t ip);
+void sensor_receive_id(uint8_t * data);
+void sensor_receive_data(uint8_t * data, uint16_t id, uint8_t len);
+
 // ERREUR défine.
 #define ERR_ID_PARSE 		-2 /*< l'ID du capteur ne correspond pas à ce que l'on attend (LIMIT_SENSOR).*/
 #endif
