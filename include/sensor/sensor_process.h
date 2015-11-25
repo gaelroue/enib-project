@@ -2,7 +2,7 @@
 #define SENSOR_PROCESS
 
 
-#define LIMIT_SENSOR		50
+
 #define SENSOR_IDH			0
 #define SENSOR_IDL			1
 #define SENSOR_OPTION_BEGIN 3

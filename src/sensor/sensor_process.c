@@ -16,7 +16,7 @@ struct sensor * sensor_tab;
 // Numéro du dernier sensor.
 uint8_t num_sensor = 1;
 int memoirePartagee;
-
+int semaphore;
 void sensor_init_process(void)
 {
 	
@@ -29,6 +29,7 @@ void sensor_init_process(void)
   		sensor_tab =(struct sensor *)shmat(memoirePartagee,NULL,0);
 		printf("Adresse de l'attachement : %p \n",sensor_tab);
   	}
+  	semaphore = init_semaphore(CLEF);
 
 }
 
@@ -178,7 +179,7 @@ void set_data_len(uint16_t id, uint8_t type)
 	if(type > NUM_TYPE_SENSOR+1){
 		return ;
 	}
-
+	take_semaphore();
 	switch(type){
 		case SENSOR_TEMP :
 			get_sensor_struct(id)->len_data = SENSOR_TEMP_LEN;
