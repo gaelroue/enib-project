@@ -72,9 +72,12 @@ void xbee_close(void)
 static int xbee_get_header(int fd, struct xbee_header * h)
 {
 	uint8_t buf[4];
-	if (read(fd, buf, 4) < 1) {
-		perror("Error getting frame header");
-		return;
+	int i;
+	for(i = 0; i < 4; i++) {
+		if (read(fd, &buf[i], 1) < 1) {
+			perror("Error getting frame header");
+			return;
+		}
 	}
 
 	if (buf[0] != 0x7E) {
