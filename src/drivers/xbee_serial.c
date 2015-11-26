@@ -154,6 +154,36 @@ void xbee_write(uint8_t * frame)
 	xbee_write_serial(xbee->fd, frame);
 }
 
+void xbee_read_failed(struct xbee_rawframe * frame)
+{
+	uint8_t buf[4];
+	while(buf[0] != 0x7e) {
+		if (read(xbee->fd, &buf[0], 1) < 1) {
+			perror("Error getting frame header");
+			return;
+		}
+	}
+	int i;
+	for(i = 0; i < 3; i++) {
+		if (read(xbee->fd, &buf[i], 1) < 1) {
+			perror("Error getting frame header");
+			return;
+		}
+	}
+
+	frame->header.delimiter = buf[0];
+	frame->header.length = ((uint16_t)buf[2] << 8) | buf[1];
+	frame->header.api = buf[3];
+
+	assert(frame);
+	assert(frame->header.length);
+
+	/* length to get checksum */
+	frame = realloc(frame, sizeof(struct xbee_rawframe) + (frame->header.length) * sizeof(uint8_t));
+	xbee_get_rawdata(xbee->fd, frame->rawdata, frame->header.length);
+
+}
+
 void xbee_print_frame(uint8_t * frame)
 {
 	uint16_t len = ((uint16_t)frame[1] << 8) + (uint16_t)frame[2];
