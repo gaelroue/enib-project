@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include "sensor/sensor_struct.h"
 #include "sensor/sensor_process.h"
-#include "drivers/semaphore.h"
+#include "sensor/semaphore.h"
 #include "base.h"
 
 struct semaphore semaphores[LIMIT_SEMAPHORE];
@@ -63,7 +63,8 @@ int remove_semaphore(int sem)
 
 void init_semaphore(void)
 {
-  for (int i = 0; i < LIMIT_SEMAPHORE; i++){
+   int i;
+  for (i = 0; i < LIMIT_SEMAPHORE; i++){
       semaphores[i].semaphore = 0;
   }
 }

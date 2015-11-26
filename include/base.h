@@ -32,9 +32,9 @@ typedef unsigned int uint32_t;
 #define __DEBUG__
 
 // FPGA :
-#define __FPGA__
+//#define __FPGA__
 // BB :
-//#define __BB__
+#define __BB__
 
 
 #define CLEF 666

@@ -1,7 +1,7 @@
 #include "base.h"
 #include "websocket/socket_function.h"
 #include "sensor/sensor_struct.h"
-#include "drivers/semaphore.h"
+#include "sensor/semaphore.h"
 /***************************************************************************
  * socket utils
  ***************************************************************************/
@@ -143,7 +143,8 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
   #ifdef __DEBUG__
     printf("buf : %s \n", buf);
   #endif
-  for (int k=1;k<nfds;k++) write(fds[k].fd, buf, strlen(buf));
+    int k;
+  for (k=1;k<nfds;k++) write(fds[k].fd, buf, strlen(buf));
   // puis parcourir les capteurs, former le JSON et l'envoyer au socket.
   // ATTENTION ndfs commence forcément à 1
 /*

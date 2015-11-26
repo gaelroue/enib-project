@@ -6,7 +6,7 @@
 #include "sensor/sensor_client.h"
 #include "sensor/sensor_struct.h"
 #include "zigbee/xbee_client.h"
-#include "drivers/semaphore.h"
+#include "sensor/semaphore.h"
 #include <time.h>
 #include <arpa/inet.h>
 
@@ -35,6 +35,11 @@ void sensor_init_process(void)
 		#endif
   	}
   	semaphore = get_semaphore(CLEF);
+	int i;
+	for(i = 1; i < LIMIT_SENSOR; i++){
+		sensor_tab[i].id = 0;
+
+	}
 
 }
 
@@ -212,7 +217,7 @@ void sensor_ask_id(uint8_t * data, uint16_t ip)
 
 			uint8_t refresh_time[4];
 			// On obtient un nouvelle ID.
-			uint16_t id = sensor_get_new_id(ip);
+			uint16_t id = sensor_get_new_id((uint8_t *)&ip);
 			// On note le type du capteur
 			get_sensor_struct(id)->type = data[OFFSET_ASK+1];
 			// On note ID de reconnaissance pour le FPGA.
@@ -221,19 +226,19 @@ void sensor_ask_id(uint8_t * data, uint16_t ip)
 			#ifdef __DEBUG__
 			printf(" --- Demande d'un nouvelle ID --- \n");
 			#endif
-			data = calloc(GIVE_ID_LEN, sizeof(uint8_t));
+			uint8_t * data_to_send = (uint8_t *)calloc(GIVE_ID_LEN, sizeof(uint8_t));
 			set_refresh_time(data[OFFSET_ASK + 1], refresh_time);
 			set_data_len(id, data[OFFSET_ASK + 1]);
 			//memcpy(refresh_time, set_refresh_time(data[OFFSET_ASK +1]), 4);
 			memcpy(get_sensor_struct(id)->refresh_time, refresh_time, 4);
 			
 		// On a nos informations on informe le capteur de son ID et taux de rafraîchissement :
-			data[SENSOR_IDH] = id>>8&0xFF;
-			data[SENSOR_IDL] = id&0xFF;
-			data[OFFSET_ASK] = GIVE_ID;
-			data[OFFSET_ASK+1] = id_fpga>>8&0xFF;
-			data[OFFSET_ASK+2] = id_fpga&0xFF;
-			memcpy(&data[OFFSET_ASK+3], refresh_time, 4);
+			data_to_send[SENSOR_IDH] = id>>8&0xFF;
+			data_to_send[SENSOR_IDL] = id&0xFF;
+			data_to_send[OFFSET_ASK] = GIVE_ID;
+			data_to_send[OFFSET_ASK+1] = id_fpga>>8&0xFF;
+			data_to_send[OFFSET_ASK+2] = id_fpga&0xFF;
+			memcpy(&data_to_send[OFFSET_ASK+3], refresh_time, 4);
 			// ***************** SEND ************************
 			#ifdef __DEBUG__
 			printf("Envoie de l'ID et du taux de rafraîchissement au capteur \n");
@@ -247,7 +252,7 @@ void sensor_ask_id(uint8_t * data, uint16_t ip)
 			printf("--- END nouvelle ID ---\n");
 
 			#endif
-			xbee_send_data(data, GIVE_ID_LEN, 0, ip);
+			xbee_send_data(data_to_send, GIVE_ID_LEN, 0, ip);
 			
 }
 
@@ -274,7 +279,8 @@ void sensor_receive_id(uint8_t * data)
 
 void sensor_receive_data(uint8_t * data, uint16_t id, uint8_t len)
 {
-	uint8_t len_data, n_data, dec, data_tmp, i, j;
+	uint8_t len_data, n_data, dec, i, j;
+	int data_tmp;
 	// On divise les données : 
 	n_data = get_sensor_struct(id)->n_data;
 	len_data = get_sensor_struct(id)->len_data;
@@ -284,8 +290,8 @@ void sensor_receive_data(uint8_t * data, uint16_t id, uint8_t len)
 		data_tmp = 0;
 		for(j = 0; j < len_data; j++){
 
-			data_tmp  = (data_tmp<<dec) | (data[OFFSET_ASK+1 + j]);
-			dec = 8;
+			data_tmp  = (data_tmp<<dec) | (data[OFFSET_ASK +1 + j]);
+			dec += 8;
 		}
 			get_sensor_struct(id)->data[i] = data_tmp;
 		

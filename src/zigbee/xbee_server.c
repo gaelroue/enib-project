@@ -10,7 +10,7 @@ pthread_mutex_t mtx;
 static void * xbee_frame_parser(void * data)
 {
 	//We protect the frame while it s copying
-	pthread_mutex_lock(&mtx);
+	//pthread_mutex_lock(&mtx);
 	struct xbee_rawframe * tmp = (struct xbee_rawframe *)data;
 
 	/*
@@ -21,7 +21,7 @@ static void * xbee_frame_parser(void * data)
 		case 0x95: {
 				struct xbee_idframe * frame = malloc(3 + tmp->header.length +1);
 				memcpy(frame, tmp, 3 + tmp->header.length +1);
-				pthread_mutex_unlock(&mtx);
+	//			pthread_mutex_unlock(&mtx);
 				uint8_t send_data[3];
 				send_data[0] = 0;
 				send_data[1] = 0;
@@ -30,15 +30,15 @@ static void * xbee_frame_parser(void * data)
 				free(frame);
 			}
 		case 0x90: {
-				struct xbee_dataframe * frame = malloc(3 + tmp->header.length +1);
+				struct xbee_rcv_data * frame = malloc(3 + tmp->header.length +1);
 				memcpy(frame, tmp, 3 + tmp->header.length +1);
-				pthread_mutex_unlock(&mtx);
-				uint8_t ip[2] = {(frame->tx.dest_addr >> 8)&0xFF, frame->tx.dest_addr&0xFF};
-				rawdata_sensor(frame->tx.data, tmp->header.length - 14, ip);
+		//		pthread_mutex_unlock(&mtx);
+				uint8_t ip[2] = {(frame->dest_addr >> 8)&0xFF, frame->dest_addr&0xFF};
+				rawdata_sensor(frame->data, frame->header.length - 14, ip);
 				free(frame);
 			}
 		default:
-			pthread_mutex_unlock(&mtx);
+		//	pthread_mutex_unlock(&mtx);
 		break;
 	}
 }
@@ -52,11 +52,12 @@ void xbee_start_server(void)
 		}
 		xbee_print_frame((uint8_t *)frame);
 
-		pthread_t th;
-		if (pthread_create(&th, NULL, xbee_frame_parser, frame)) {
-			printf("Error creating thread\n");
-			exit(1);
-		}
+		//pthread_t th;
+		//if (pthread_create(&th, NULL, xbee_frame_parser, frame)) {
+		//	printf("Error creating thread\n");
+		//	exit(1);
+		//}
+		xbee_frame_parser(frame);
 
 
 	}
