@@ -9,45 +9,74 @@ static struct xbee_serial * xbee;
 
 static void xbee_open_serial(struct xbee_serial * s)
 {
-	struct termios tty;
+	struct termios newattr;
+	struct termios oldattr;
 
-	/* Open device */
-	/*
-	 * configuration options
-	 * 	O_RDWR - we need read and write access
-	 *	O_CTTY - prevent other input (like keyboard) from affecting what we read
-	 *	O_NDELAY - We don't care if the other side is connected (some devices don't explicitly connect)
-	 */
-	if ((s->fd = open(s->device, O_RDWR | O_NOCTTY )) < 0) {
-		perror(s->device);
-		exit(1);
+	if((s->fd = open(s->device, O_RDWR | O_NOCTTY)) < 0) {
+		perror("Failed to open serial port");
+		exit(EXIT_FAILURE);
+	} else if(tcgetattr(s->fd, &oldattr) != 0) {
+		perror("Failed to get configuration");
+		exit(EXIT_FAILURE);
+	}
+	newattr = oldattr;
+
+	cfsetispeed(&newattr, B9600);
+	cfsetospeed(&newattr, B9600);
+	newattr.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP
+			| INLCR | IGNCR | ICRNL | IXON);
+	newattr.c_oflag &= ~OPOST;
+	newattr.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+	newattr.c_cflag &= ~(CSIZE | PARENB | HUPCL);
+	newattr.c_cflag |= CS8;
+	newattr.c_cc[VMIN]  = 50;
+	newattr.c_cc[VTIME] = 10;
+
+	if(tcsetattr(s->fd, TCSANOW, &newattr) != 0) {
+		perror("Failed to set configuration");
+		exit(EXIT_FAILURE);
 	}
 
-	/* Read parameters */
-	tcgetattr(s->fd, &tty);
+	tcflush(s->fd,TCIOFLUSH);
+	//struct termios tty;
 
-	/* Change baud rate (output/input) to 9600*/
-	cfsetispeed(&tty, B9600);
-	cfsetospeed(&tty, B9600);
-	
-	// Set 8-bit mode
-	tty.c_cflag &= ~CSIZE;
-	tty.c_cflag |= CS8;
+	///* Open device */
+	///*
+	// * configuration options
+	// * 	O_RDWR - we need read and write access
+	// *	O_CTTY - prevent other input (like keyboard) from affecting what we read
+	// *	O_NDELAY - We don't care if the other side is connected (some devices don't explicitly connect)
+	// */
+	//if ((s->fd = open(s->device, O_RDWR | O_NOCTTY)) < 0) {
+	//	perror(s->device);
+	//	exit(1);
+	//}
 
-	tty.c_cc[VMIN]  = 100;
-	tty.c_cc[VTIME] = 10;
+	///* Read parameters */
+	//tcgetattr(s->fd, &tty);
+
+	///* Change baud rate (output/input) to 9600*/
+	//cfsetispeed(&tty, B9600);
+	//cfsetospeed(&tty, B9600);
+	//
+	//// Set 8-bit mode
+	//tty.c_cflag &= ~CSIZE;
+	//tty.c_cflag |= CS8;
+
+	//tty.c_cc[VMIN]  = 100;
+	//tty.c_cc[VTIME] = 10;
 
 
-	// Enable the receiver and set local mode...
-	tty.c_cflag |= (CLOCAL | CREAD);  //| ICANON 
-	tty.c_cflag &= ~CSIZE;
-	tty.c_cflag |= CS8;
-	//tty.c_lflag &= ~(ECHO | ECHONL | IEXTEN);
+	//// Enable the receiver and set local mode...
+	//tty.c_cflag |= (CLOCAL | CREAD);  //| ICANON 
+	//tty.c_cflag &= ~CSIZE;
+	//tty.c_cflag |= CS8;
+	////tty.c_lflag &= ~(ECHO | ECHONL | IEXTEN);
 
-	/* Apply new configuration*/
-	if (tcsetattr(s->fd, TCSANOW, &tty) == -1) {
-		return errno;
-	}
+	///* Apply new configuration*/
+	//if (tcsetattr(s->fd, TCSANOW, &tty) == -1) {
+	//	return errno;
+	//}
 
 }
 
@@ -164,7 +193,7 @@ void xbee_read_failed(struct xbee_rawframe * frame)
 		}
 	}
 	int i;
-	for(i = 0; i < 3; i++) {
+	for(i = 1; i < 4; i++) {
 		if (read(xbee->fd, &buf[i], 1) < 1) {
 			perror("Error getting frame header");
 			return;
