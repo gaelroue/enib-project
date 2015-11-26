@@ -39,8 +39,10 @@ static void xbee_open_serial(struct xbee_serial * s)
 
 
 	// Enable the receiver and set local mode...
-	//tty.c_cflag |= (CLOCAL | CREAD);  | ICANON 
-	tty.c_lflag &= ~(ECHO | ECHONL | IEXTEN);
+	tty.c_cflag |= (CLOCAL | CREAD);  //| ICANON 
+	tty.c_cflag &= ~CSIZE;
+	tty.c_cflag |= CS8;
+	//tty.c_lflag &= ~(ECHO | ECHONL | IEXTEN);
 
 	/* Apply new configuration*/
 	if (tcsetattr(s->fd, TCSANOW, &tty) == -1) {
