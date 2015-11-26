@@ -5,7 +5,7 @@
 #include "sensor/sensor_client.h"
 #include "sensor/sensor_struct.h"
 #include "sensor/sensor_process.h"
-#include "drivers/semaphore.h"
+#include "sensor/semaphore.h"
 
 void sensor_init_client(void)
 {
