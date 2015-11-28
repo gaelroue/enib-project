@@ -1,6 +1,7 @@
 #include "base.h"
 #include "drivers/xbee_serial.h"
 #include "zigbee/xbee_struct.h"
+#include "zigbee/xbee_server.h"
 #include <termios.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -146,6 +147,7 @@ static int xbee_read_serial(struct xbee_serial * s, struct xbee_rawframe * frame
 	}
 
 	if (fds.revents & POLLIN ) {
+		xbee_lock_frame();
 		if (xbee_get_header(s->fd, &frame->header) == -1) {
 			return -1;
 		}
@@ -156,6 +158,7 @@ static int xbee_read_serial(struct xbee_serial * s, struct xbee_rawframe * frame
 		/* length to get checksum */
 		frame = realloc(frame, sizeof(struct xbee_rawframe) + (frame->header.length) * sizeof(uint8_t));
 		xbee_get_rawdata(s->fd, frame->rawdata, frame->header.length);
+		xbee_unlock_frame();
 	}
 
 	return 0;
@@ -199,6 +202,7 @@ void xbee_read_failed(struct xbee_rawframe * frame)
 			return;
 		}
 	}
+	xbee_lock_frame();
 
 	frame->header.delimiter = buf[0];
 	frame->header.length = ((uint16_t)buf[2] << 8) | buf[1];
@@ -210,6 +214,7 @@ void xbee_read_failed(struct xbee_rawframe * frame)
 	/* length to get checksum */
 	frame = realloc(frame, sizeof(struct xbee_rawframe) + (frame->header.length) * sizeof(uint8_t));
 	xbee_get_rawdata(xbee->fd, frame->rawdata, frame->header.length);
+	xbee_unlock_frame();
 
 }
 

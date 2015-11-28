@@ -18,7 +18,7 @@
 #define NUM_TYPE_SENSOR				3
 /***** CAPTEUR TYPE *****/
 #define SENSOR_TEMP				0x01
-	#define SENSOR_TEMP_LEN 	INT
+	#define SENSOR_TEMP_LEN 	2
 #define SENSOR_LUMI				0x02
 	#define SENSOR_LUMI_LEN		2
 #define SENSOR_PRESS 			0x03
