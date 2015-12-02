@@ -10,8 +10,8 @@ struct xbee_serial {
 
 void xbee_open(char * port);
 void xbee_close(void);
-int xbee_read(struct xbee_rawframe * frame);
-void xbee_read_failed(struct xbee_rawframe * frame);
+struct xbee_rawframe * xbee_read(void);
+struct xbee_rawframe * xbee_read_failed(void);
 void xbee_write(uint8_t * frame);
 void xbee_print_frame(uint8_t * frame);
 

@@ -39,46 +39,6 @@ static void xbee_open_serial(struct xbee_serial * s)
 	}
 
 	tcflush(s->fd,TCIOFLUSH);
-	//struct termios tty;
-
-	///* Open device */
-	///*
-	// * configuration options
-	// * 	O_RDWR - we need read and write access
-	// *	O_CTTY - prevent other input (like keyboard) from affecting what we read
-	// *	O_NDELAY - We don't care if the other side is connected (some devices don't explicitly connect)
-	// */
-	//if ((s->fd = open(s->device, O_RDWR | O_NOCTTY)) < 0) {
-	//	perror(s->device);
-	//	exit(1);
-	//}
-
-	///* Read parameters */
-	//tcgetattr(s->fd, &tty);
-
-	///* Change baud rate (output/input) to 9600*/
-	//cfsetispeed(&tty, B9600);
-	//cfsetospeed(&tty, B9600);
-	//
-	//// Set 8-bit mode
-	//tty.c_cflag &= ~CSIZE;
-	//tty.c_cflag |= CS8;
-
-	//tty.c_cc[VMIN]  = 100;
-	//tty.c_cc[VTIME] = 10;
-
-
-	//// Enable the receiver and set local mode...
-	//tty.c_cflag |= (CLOCAL | CREAD);  //| ICANON 
-	//tty.c_cflag &= ~CSIZE;
-	//tty.c_cflag |= CS8;
-	////tty.c_lflag &= ~(ECHO | ECHONL | IEXTEN);
-
-	///* Apply new configuration*/
-	//if (tcsetattr(s->fd, TCSANOW, &tty) == -1) {
-	//	return errno;
-	//}
-
 }
 
 void xbee_open(char * port)
@@ -101,23 +61,13 @@ void xbee_close(void)
 	xbee_close_serial(xbee);
 }
 
-static int xbee_get_header(int fd, struct xbee_header * h)
+static void xbee_get_header(int fd, uint8_t buf[4])
 {
-	uint8_t buf[4];
-	int i;
-	for(i = 0; i < 4; i++) {
-		if (read(fd, &buf[i], 1) < 1) {
-			perror("Error getting frame header");
-			return;
-		}
+	if (read(fd, buf, 4) < 1) {
+		perror("Error getting frame header");
+		return;
 	}
 
-	if (buf[0] != 0x7E) {
-		return -1;
-	}
-	h->delimiter = buf[0];
-	h->length = ((uint16_t)buf[2] << 8) | buf[1];
-	h->api = buf[3];
 }
 
 static void xbee_get_rawdata(int fd, uint8_t * data, uint16_t length)
@@ -128,7 +78,7 @@ static void xbee_get_rawdata(int fd, uint8_t * data, uint16_t length)
 	}
 }
 
-static int xbee_read_serial(struct xbee_serial * s, struct xbee_rawframe * frame)
+static struct xbee_rawframe * xbee_read_serial(struct xbee_serial * s)
 {
 	struct pollfd fds;
 	int timeout_msecs = 500;
@@ -147,26 +97,26 @@ static int xbee_read_serial(struct xbee_serial * s, struct xbee_rawframe * frame
 	}
 
 	if (fds.revents & POLLIN ) {
-		xbee_lock_frame();
-		if (xbee_get_header(s->fd, &frame->header) == -1) {
-			return -1;
+		uint8_t buf[4];
+		xbee_get_header(s->fd, buf);
+		if (buf[0] != 0x7E) {
+			return xbee_read_failed();
 		}
-
-		assert(frame);
-		assert(frame->header.length);
+		uint16_t length = ((uint16_t)buf[2] << 8) | buf[1];
+		struct xbee_rawframe * frame = malloc(sizeof(struct xbee_rawframe) + (length) * sizeof(uint8_t));
+		frame->header.delimiter = buf[0];
+		frame->header.length = length;
+		frame->header.api = buf[3];
 
 		/* length to get checksum */
-		frame = realloc(frame, sizeof(struct xbee_rawframe) + (frame->header.length) * sizeof(uint8_t));
 		xbee_get_rawdata(s->fd, frame->rawdata, frame->header.length);
-		xbee_unlock_frame();
+		return frame;
 	}
-
-	return 0;
 }
 
-int xbee_read(struct xbee_rawframe * frame)
+struct xbee_rawframe * xbee_read(void)
 {
-	return xbee_read_serial(xbee, frame);
+	return xbee_read_serial(xbee);
 }
 
 static void xbee_write_serial(int fd, uint8_t * frame)
@@ -186,7 +136,7 @@ void xbee_write(uint8_t * frame)
 	xbee_write_serial(xbee->fd, frame);
 }
 
-void xbee_read_failed(struct xbee_rawframe * frame)
+struct xbee_rawframe * xbee_read_failed(void)
 {
 	uint8_t buf[4];
 	while(buf[0] != 0x7e) {
@@ -202,20 +152,15 @@ void xbee_read_failed(struct xbee_rawframe * frame)
 			return;
 		}
 	}
-	xbee_lock_frame();
-
+	uint16_t length = ((uint16_t)buf[2] << 8) | buf[1];
+	struct xbee_rawframe * frame = malloc(sizeof(struct xbee_rawframe) + (length) * sizeof(uint8_t));
 	frame->header.delimiter = buf[0];
-	frame->header.length = ((uint16_t)buf[2] << 8) | buf[1];
+	frame->header.length = length;
 	frame->header.api = buf[3];
 
-	assert(frame);
-	assert(frame->header.length);
-
 	/* length to get checksum */
-	frame = realloc(frame, sizeof(struct xbee_rawframe) + (frame->header.length) * sizeof(uint8_t));
 	xbee_get_rawdata(xbee->fd, frame->rawdata, frame->header.length);
-	xbee_unlock_frame();
-
+	return frame;
 }
 
 void xbee_print_frame(uint8_t * frame)
