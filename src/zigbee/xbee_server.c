@@ -67,9 +67,6 @@ void xbee_start_server(void)
 			printf("Error creating thread\n");
 			exit(1);
 		}
-		xbee_frame_parser(frame);
-
-
 	}
 	free(frame);
 }
