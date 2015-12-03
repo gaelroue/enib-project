@@ -56,6 +56,11 @@ style of existing files:
 
  and no space around the '.' and "->" structure member operators.
 
+### Sensor refresh automatic :
+
+For 1 second -> put 1000 in struct sensor refresh_time.
+500ms -> put 500;
+1,5s -> put 1500...
 
 ### TODO :
 
