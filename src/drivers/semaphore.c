@@ -82,3 +82,10 @@ int remove_semaphore(void)
 	semctl(semaphores,0,IPC_RMID);
 }
 
+void init_semaphore(int sem)
+{
+  int i;
+  for (i = 0; i < LIMIT_SEMAPHORE; i++){
+      semaphores[i].semaphore = 0;
+  }
+}

@@ -118,6 +118,7 @@ void let_memory_share(void * attache_memory)
 
 void socket_server_check_sensor(struct pollfd * fds, int nfds)
 {
+	srand(time(NULL));
   
  int nb_sensor = 0; // TO DO : récupérer le nombre de capteur connecter.
   // On appel la mémoire :
