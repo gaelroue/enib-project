@@ -1,4 +1,4 @@
-Gauge = function(id) {
+Gauge = function(id, type) {
 	//canvas initialization
 	var canvas=document.getElementById(id);
 	var ctx = canvas.getContext("2d");
@@ -41,7 +41,22 @@ Gauge = function(id) {
 	
 		ctx.fillStyle = color;
 		ctx.font = "50px Arial";
-		text = data + "%";
+		switch(type)
+		{
+			case 0:
+				text = data + " lux";
+			break;
+			case 1:
+				text = data + "°";
+			break;
+			case 2:
+				text = data + "%";
+			break;
+			case 3:
+				text = data + "xyz";
+			break;
+
+		}
 		//Lets center the text
 		//deducting half of text width from position x
 		text_width = ctx.measureText(text).width;

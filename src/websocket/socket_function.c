@@ -124,20 +124,19 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
   char buf[500]; 
 
   //strcat(buf, " \"sensor\": { \"nb_sensor\" :[{ \"value\" :]");
-  sprintf(buf, "{ \"nb_sensor\" : %d, \
-                    \"sensor\" : [ \n", nb_sensor);
+  sprintf(buf, "{ \"sensor\" : [ \n");
 
 	int i;
 	char tmp_buf[100];
 	for(i = 0; i < nb_sensor; i++){
-		int type = rand() % 5;
+		int type = rand() % 4;
 		int id = rand() % 10;
 		int value = rand() % 50;
 		int refresh = 1+i;
 		if(i+1 == nb_sensor){
-			sprintf(tmp_buf, "{\"id\" : %d, \"type\" : %d,\n \"value\":%d,\n \"refresh\":%d }", type, value, refresh);
+			sprintf(tmp_buf, "{\"id\" : %d, \"type\" : %d,\n \"value\":%d,\n \"refresh\":%d }", id, type, value, refresh);
 		}else{
-			sprintf(tmp_buf, "{\"id\" : %d, \"type\" : %d, \n \"value\":%d,\n \"refresh\":%d },", type, value, refresh);  
+			sprintf(tmp_buf, "{\"id\" : %d, \"type\" : %d, \n \"value\":%d,\n \"refresh\":%d },", id, type, value, refresh);  
 		}
 		strcat(buf,tmp_buf);
 	}

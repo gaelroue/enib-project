@@ -2,48 +2,161 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Atmel Corporation - Software Examples</title>
+  <title>Electronique Project</title>
   <link rel="stylesheet" type="text/css" href="style.css" />
+  <script src="gauge.js"></script>
+  <script>
+    var ws;
+
+    function appendTxtNode(msg) {
+        var txtNode = document.createTextNode(msg);
+        var brNode = document.createElement('br');
+        var cnode = document.getElementById('log');
+        cnode.appendChild(txtNode);
+        cnode.appendChild(brNode);
+    }
+    function doSend() {
+        var msg = document.getElementById('sendmsg').value;
+        if (!msg.length) {
+            return;
+        }
+        ws.send(msg);
+        document.getElementById('sendmsg').value='';
+    }
+
+	function progressFn(value, type)
+	{
+        	div = document.getElementById(type);
+		progress = document.createElement('progress');
+		progress.max = 50;
+		progress.min = -10;
+		progress.value = value;
+		div.appendChild(progress);
+
+
+	}
+
+	function gaugeFn(data, type)
+	{
+        	div = document.getElementById(type);
+
+		ul = document.createElement('ul');
+		li = document.createElement('li');
+
+		li.innerHTML="Sensor id : "+ data.id;
+		ul.appendChild(li);
+		div.appendChild(ul);
+
+		li = document.createElement('li');
+
+		canvas = document.createElement('canvas');
+		canvas.id = 'gauge'+data.id;
+		canvas.width = 300;
+		canvas.height = 300;
+		li.appendChild(canvas);
+		ul.appendChild(li);
+		div.appendChild(ul);
+		var gauge=new Gauge('gauge'+data.id, data.type);
+		gauge.draw(data.value);
+
+
+	}
+
+
+	function displaySensors(data)
+	{
+		tr = document.getElementById('sensors.tr');
+		for (i = 0; data.sensor[i]; i++) {
+			td = document.createElement('td');
+			switch(data.sensor[i].type)
+			{
+				case 2:
+					div = document.createElement('div');
+					type = "light";
+					div.id = type;
+					td.appendChild(div);
+					tr.appendChild(td);
+					gaugeFn(data.sensor[i], type)
+				break;
+				case 1:
+					div = document.createElement('div');
+					type = "temperature";
+					div.id = type;
+					td.appendChild(div);
+					tr.appendChild(td);
+					progressFn(data.sensor[i].value, type);
+				break;
+				case 4:
+					div = document.createElement('div');
+					type = "potard";
+					div.id = type;
+					td.appendChild(div);
+					tr.appendChild(td);
+					gaugeFn(data.sensor[i], type)
+				break;
+				case 3:
+					div = document.createElement('div');
+					type = "accelerometre";
+					div.id = type;
+		ul = document.createElement('ul');
+		li = document.createElement('li');
+
+		li.innerHTML="Sensor id : "+ data.sensor[i].id;
+		ul.appendChild(li);
+		div.appendChild(ul);
+
+		li = document.createElement('li');
+		ul.appendChild(li);
+		li.innerHTML="Accelero : "+ data.sensor[i].value[0]+ ' x,'+ data.sensor[i].value[1]+ ' y,'+ data.sensor[i].value[2]+' z';
+
+					td.appendChild(div);
+					tr.appendChild(td);
+//					gaugeFn(data.sensor[i], type)
+				break;
+
+			}
+			
+		}
+	}
+
+    function init() {
+        ws = new WebSocket('ws://127.0.0.1/api');
+	//ws.onopen = function(e) {
+        //    appendTxtNode('WebSocket opened');
+        //};
+        ws.onmessage = function(msg) {
+        	tr = document.getElementById('sensors.tr');
+		while (tr.hasChildNodes()) {
+			tr.removeChild(tr.lastChild);
+		}
+
+		data = JSON.parse(msg.data);
+
+		displaySensors(data);
+        };
+        ws.onclose = function(e) {
+            appendTxtNode('WebSocket closed');
+        };
+    }
+  </script>
 </head>
-<body>
-<div id="body">
-<h1>AT91SAM9261-EK development board</h1>
-<div id="banner"></div>
-<div id="contents">
-  <table>
-  <tr>
-    <th width="200">Web Access</th>
-    <th>Documentation</th>
-  </tr>
-  <tr>
-    <td><a href="pdf/6062s.pdf">AT91SAM9261 Summary</a></td>
-    <td class="description">Summary datasheet for the AT91SAM9261.</td>
-  </tr>
-  <tr>
-    <td><a href="pdf/doc6062.pdf">AT91SAM9261 Datasheet</a></td>
-    <td class="description">Datasheet for the AT91SAM9261.</td>
-  </tr>
-  <tr>
-    <td><a href="pdf/doc6198.pdf">AT91SAM9261-EK</a></td>
-    <td class="description">User guide for the AT91SAM9261 evaluation kit.</td>
-  </tr>
-  </table>
-  <table>
-  <tr><th>Get Linux Information</th></tr>
-  <tr><td><a href="cgi-bin/get-name">get name</a></td></tr>
-  <tr><td><a href="cgi-bin/get-ps">get process status</a></td></tr>
-  </table>
-  <table>
-  <tr><th>Interact with the card</th></tr>
-  <tr><td><a href="led.html">control the ds7 led (v1)</a></td></tr>
-  <tr><td><a href="cgi-bin/test3.lua">control the ds7 led (v2)</a></td></tr>
-  <tr><td><a href="cgi-bin/test4.lua">control the ds7 led (v3)</a></td></tr>
-  <tr><td><a href="test5.html">control the ds7 led (AJAX verbose)</a></td></tr>
-  <tr><td><a href="test6.html">control the ds7 led (AJAX)</a></td></tr>
-  <tr><td><a href="ws.html">websocket test</a></td></tr>
-  <tr><td><a href="ws2.html">websocket+JSON test</a></td></tr>
-  </table>
-</div>
-</div>
+<body onload="init()">
+  <h1>Sensors Board</h1>
+  <div id="banner"></div>
+  <div id="contents">
+    <table>
+    <tr><th>Sensors</th></tr>
+    <tr id="sensors.tr">
+	    <!--td><div id="temperature"></div></td>
+	    <td><div id="light"></div></td>
+	    <td><div id="potard"></div></td>
+	    <td><div id="accelerometre"></div></td-->
+   <!--td>
+		    <div id="sensors"><ul id="sensors.ul"></ul></div>
+		    <div><canvas id="gauge" width="300" height="300"></div>
+    </td-->
+    </tr>
+    </table>
+  </div>
 </body>
 </html>
