@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Control AT91SAM9261-EK board with WebSocket</title>
+  <link rel="stylesheet" type="text/css" href="../style.css" />
+  <script src="gauge.js"></script>
+  <script>
+    var ws;
+
+    function appendTxtNode(msg) {
+        var txtNode = document.createTextNode(msg);
+        var brNode = document.createElement('br');
+        var cnode = document.getElementById('log');
+        cnode.appendChild(txtNode);
+        cnode.appendChild(brNode);
+    }
+    function doSend() {
+        var msg = document.getElementById('sendmsg').value;
+        if (!msg.length) {
+            return;
+        }
+        ws.send(msg);
+        document.getElementById('sendmsg').value='';
+    }
+    function init() {
+        ws = new WebSocket('ws://127.0.0.1/board');
+        var listElement = document.createElement("ul");
+        ws.onopen = function(e) {
+            appendTxtNode('WebSocket opened');
+        };
+        ws.onmessage = function(evt) {
+        	//var content=document.getElementById("content");
+        	var msg = JSON.parse(evt.data);
+
+         
+          content.appendChild(listElement);
+
+          //document.write(msg); 
+          for(i = 0; i < msg.nb_sensor; i++ )
+          {
+              var listItem = document.createElement("li");
+            listItem.innerHTML="<li id = "+i+">type : "+msg.sensor[i].type+"<br \>  value : "+msg.sensor[i].value+"<br \> refresh :"+msg.sensor[i].refresh+"</li>";
+            listElement.appendChild(listItem);
+          }
+   
+        };
+        ws.onclose = function(e) {
+            appendTxtNode('WebSocket closed');
+        };
+    
+    	//var gauge=new Gauge('gauge');
+    }
+  </script>
+</head>
+<body onload="init()">
+  <h1>AT91SAM9261-EK development board</h1>
+  <div id="banner"></div>
+  <div id="contents">
+    <table>
+    <tr><th>Control ds7 led</th></tr>
+    <tr><td>
+      <input id="sendmsg" type="text" onChange="doSend()"></input>
+      <button onClick="doSend()">Send</button>
+    </td></tr>
+    </table>
+    <table>
+    <tr><th>show cpu workload (%)</th></tr>
+    <tr><td>
+      <div id="content"></div>
+      <div><canvas id="gauge" width="300" height="300"></div>
+    </td></tr>
+    <tr><th>websocket log</th></tr>
+    <tr><td>
+      <div id="log"></div>
+    </td></tr>
+    </table>
+  </div>
+</body>
+</html>

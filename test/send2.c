@@ -16,18 +16,8 @@ int main(int argc, char **argv)
 	}
 	xbee_open((char *)argv[1]);
 
-	uint8_t data[2];
-	uint8_t i;
-	xbee_send_atcommand("sh", 0, 0);
-	//xbee_send_atcommand("sl", 0, 0);
-	// while(1){
-	// 	sleep(3);
-	// 	printf("%x ", i);
-	// 	data[0] =i++;
-	// 	printf("%x\n", i);
-	// 	data[1] =i++;
-	// 	xbee_send_data(data, 2, 0, 0);
-	// }
+	uint8_t data[] = { 0x00, 0x01, 0x02};
+	xbee_send_data(data, 3, 0, 0);
 	/* Closing file descriptor */
 	xbee_close();
 	return 0;

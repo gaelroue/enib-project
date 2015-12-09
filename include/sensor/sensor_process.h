@@ -2,7 +2,7 @@
 #define SENSOR_PROCESS
 
 
-#define LIMIT_SENSOR		50
+
 #define SENSOR_IDH			0
 #define SENSOR_IDL			1
 #define SENSOR_OPTION_BEGIN 3
@@ -18,11 +18,13 @@
 #define NUM_TYPE_SENSOR				3
 /***** CAPTEUR TYPE *****/
 #define SENSOR_TEMP				0x01
-	#define SENSOR_TEMP_LEN 	INT
+	#define SENSOR_TEMP_LEN 	2
 #define SENSOR_LUMI				0x02
-	#define SENSOR_LUMI_LEN		INT
-#define SENSOR_PRESS 			0x03
-	#define SENSOR_PRESS_LEN	INT
+	#define SENSOR_LUMI_LEN		2
+#define SENSOR_AXIS 			0x03
+	#define SENSOR_AXIS_LEN		1
+#define SENSOR_ADC				0x04
+	#define SENSOR_ADC_LEN		2
 
 
 /*****************************
@@ -57,7 +59,7 @@ uint16_t id_sensor(uint8_t *data);
 * in : sensor_type - uint8_t < type du capteur
 * out : taux de rafraichissement.
 */
-void  set_refresh_time( uint8_t sensor_type, uint8_t * refresh_time);
+void  set_init_refresh_time( uint8_t sensor_type, uint8_t * refresh_time);
 
 
 void set_data_len(uint16_t new_id, uint8_t type);
@@ -66,6 +68,10 @@ void update_ip(uint16_t id, uint8_t * ip);
 
 void * beagle_check_sensor(void * data);
 
+void sensor_ask_id(uint8_t * data, uint16_t ip);
+void sensor_receive_id(uint8_t * data);
+void sensor_receive_data(uint8_t * data, uint16_t id, uint8_t len);
+void update_refresh_time(uint16_t id);
 // ERREUR défine.
 #define ERR_ID_PARSE 		-2 /*< l'ID du capteur ne correspond pas à ce que l'on attend (LIMIT_SENSOR).*/
 #endif

@@ -1,0 +1,39 @@
+#!/bin/sh
+echo Content-type: text/html
+echo
+# send prelude html page
+cat <<html-prelude
+<!DOCTYPE PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+    <head>
+        <title>Atmel Corporation - Software Examples</title>
+        <link rel="stylesheet" type="text/css" href="../style.css" />
+    </head>
+
+    <body>
+        <div id="body">
+            <h1>AT91SAM9261-EK development board</h1>
+            <div id="banner"></div>
+
+            <div id="contents">
+                <table>
+                    <tr>
+                        <th>Get processes status : ps</th>
+                    </tr>
+					<tr>
+						<td><pre>
+html-prelude
+
+# command to execute
+ps
+
+# send postlude html page
+cat <<html-postlude
+						</pre></td>
+					</tr>
+				</table>
+            </div>
+        </div>
+    </body>
+</html>
+html-postlude

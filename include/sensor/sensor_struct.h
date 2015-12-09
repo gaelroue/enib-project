@@ -32,6 +32,7 @@ struct sensor
 	#define N_DATA_MAX 	6
 	int data[N_DATA_MAX]; /*<  Donnée du capteur */
 	struct stats_sensor stat;
+	uint32_t compar_refresh_time;
 };
 
 
