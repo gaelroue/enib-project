@@ -10,7 +10,7 @@ void xbee_send_data(uint8_t * data, int len, uint8_t * dest_mac, uint16_t dest_a
 	f->header.delimiter = 0x7e;
 	f->header.api = 0x10;
 	f->frame_id = 0x01;
-
+	uint8_t mac[8] =  {0x00, 0x13, 0xA2,0x00, 0x40, 0x89, 0xEC, 0x0F};
 	int i;
 	if (!dest_mac) {
 		dest_mac = calloc(8, sizeof(uint8_t));
@@ -20,7 +20,7 @@ void xbee_send_data(uint8_t * data, int len, uint8_t * dest_mac, uint16_t dest_a
 	}
 
 	for ( i = 0; i < 8; i++) {
-		f->tx.dest_mac[i] = dest_mac[i];
+		f->tx.dest_mac[i] = mac[i];
 	}
 
 	if (!dest_addr) {
@@ -39,7 +39,7 @@ void xbee_send_data(uint8_t * data, int len, uint8_t * dest_mac, uint16_t dest_a
 	checksum((uint8_t *) f);
 
 	xbee_write((uint8_t *) f);
-
+	xbee_print_frame((uint8_t *) f);
 	free(f);
 }
 

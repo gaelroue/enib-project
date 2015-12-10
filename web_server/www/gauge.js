@@ -43,13 +43,13 @@ Gauge = function(id, type) {
 		ctx.font = "50px Arial";
 		switch(type)
 		{
-			case 0:
+			case 2:
 				text = data + " lux";
 			break;
 			case 1:
 				text = data + "°";
 			break;
-			case 2:
+			case 4:
 				text = data + "%";
 			break;
 			case 3:

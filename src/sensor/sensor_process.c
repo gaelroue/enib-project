@@ -111,22 +111,22 @@ void  set_init_refresh_time( uint8_t sensor_type, uint8_t * refresh_time)
 		// 1 seconde;
 			tmp_refresh_time[0] = 0;
 			tmp_refresh_time[1] = 0;
-			// tmp_refresh_time[2] = 0x03;
-			// tmp_refresh_time[3] = 0xE8; 
+			tmp_refresh_time[2] = 0x03;
+			tmp_refresh_time[3] = 0xE8; 
 		break;
 		case SENSOR_LUMI :
 		
 			tmp_refresh_time[0] = 0;
 			tmp_refresh_time[1] = 0;
-			// tmp_refresh_time[2] = 0x03;
-			// tmp_refresh_time[3] = 0xE8; 
+			tmp_refresh_time[2] = 0x03;
+			tmp_refresh_time[3] = 0xE8; 
 		break;
 		case SENSOR_AXIS :
 		// 500 ms
 			tmp_refresh_time[0] = 0;
 			tmp_refresh_time[1] = 0;
-			// tmp_refresh_time[2] = 0x03;
-			// tmp_refresh_time[3] = 0xE8; 
+			tmp_refresh_time[2] = 0x03;
+			tmp_refresh_time[3] = 0xE8; 
 		break;
 		case SENSOR_ADC :
 			tmp_refresh_time[0] = 0;
@@ -337,16 +337,16 @@ void sensor_receive_data(uint8_t * data, uint16_t id, uint8_t len)
 		//get_sensor_struct(id)->data[i];
 	}
 
-	#ifdef __DEBUG__
-		printf(" ---- Données reçu : ----\n");
-		printf("De la part de : %d \n", id);
-		printf("Valeur : ");
+	//#ifdef __DEBUG__
+	//	printf(" ---- Données reçu : ----\n");
+	//	printf("De la part de : %d \n", id);
+	//	printf("Valeur : ");
 
-		for(i = 0; i < n_data; i++){
-			printf("%d", get_sensor_struct(id)->data[i]);
-		}
-		printf("\n-----fin de données reçu ----\n");
-	#endif
+	//	for(i = 0; i < n_data; i++){
+	//		printf("%d", get_sensor_struct(id)->data[i]);
+	//	}
+	//	printf("\n-----fin de données reçu ----\n");
+	//#endif
 }
 
 void update_refresh_time(uint16_t id)

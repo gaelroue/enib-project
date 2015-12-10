@@ -107,7 +107,7 @@
 
 		li = document.createElement('li');
 		ul.appendChild(li);
-		li.innerHTML="Accelero : "+ data.sensor[i].value[0]+ ' x,'+ data.sensor[i].value[1]+ ' y,'+ data.sensor[i].value[2]+' z';
+		li.innerHTML="Accelero : "+ data.sensor[i].value[0]+ " x,"+ data.sensor[i].value[1]+ " y,"+ data.sensor[i].value[2]+" z";
 
 					td.appendChild(div);
 					tr.appendChild(td);
@@ -120,7 +120,7 @@
 	}
 
     function init() {
-        ws = new WebSocket('ws://127.0.0.1/api');
+        ws = new WebSocket('ws://192.168.0.2/api');
 	//ws.onopen = function(e) {
         //    appendTxtNode('WebSocket opened');
         //};

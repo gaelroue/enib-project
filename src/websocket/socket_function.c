@@ -142,13 +142,14 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
   for( i = 0; i < LIMIT_SENSOR; i++){
 
     if(memory_attach[i].id == 0) continue;
-    nb_sensor++; // On incrémente le nombre de capteur puisque l'on en ajoute 1.
     if(nb_sensor != 0){
        sprintf(tmp_buf, ",");  
       strcat(buf_sensor,tmp_buf);
     }
+    nb_sensor++; // On incrémente le nombre de capteur puisque l'on en ajoute 1.
     int type = memory_attach[i].type;
     int data = memory_attach[i].data[0];
+    int data2 = 0;
     int refresh = memory_attach[i].refresh_time[0]<<24 | memory_attach[i].refresh_time[1]<<16 | memory_attach[i].refresh_time[2]<<8 | memory_attach[i].refresh_time[3];
     int id = memory_attach[i].id;
     int exposant = 0;
@@ -174,12 +175,13 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
       break;
       case SENSOR_AXIS:
   
-        sprintf(tmp_buf, "{ \"id\" : %d,\"type\" : %d, \n \"value\":[%d,%d,%d],\n \"refresh\":%d }", id, type, (char)memory_attach[i].data[0],(char)memory_attach[i].data[1],(char)memory_attach[i].data[2], refresh);
+        sprintf(tmp_buf, "{ \"id\" : %d,\"type\" : %d, \n \"value\":[%d,%d,%d],\n \"refresh\":%d }", id, type, (int)memory_attach[i].data[0],(char)memory_attach[i].data[1],(char)memory_attach[i].data[2], refresh);
         strcat(buf_sensor,tmp_buf);
       break;
       case SENSOR_ADC :
-        data = (int)4096*data/100;
-        sprintf(tmp_buf, "{ \"id\" : %d,\"type\" : %d, \n \"value\":%d,\n \"refresh\":%d },", id, type, data, refresh);  
+        data = (int)100*data/4096;
+        data2 = (int)100*memory_attach[i].data[1]/4096;
+        sprintf(tmp_buf, "{ \"id\" : %d,\"type\" : %d, \n \"value\": [%d, %d],\n \"refresh\":%d }", id, type, data, data2, refresh);  
         strcat(buf_sensor,tmp_buf);
      break;
       default:
@@ -200,8 +202,10 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
   #ifdef __DEBUG__
     printf("buf : %s \n", buf_to_send);
   #endif
+  if (nb_sensor != 0) {
     int k;
   for (k=1;k<nfds;k++) write(fds[k].fd, buf_to_send, strlen(buf_to_send));
+  }
   // puis parcourir les capteurs, former le JSON et l'envoyer au socket.
   // ATTENTION ndfs commence forcément à 1
 /*
