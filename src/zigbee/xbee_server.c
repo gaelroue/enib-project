@@ -40,7 +40,7 @@ static void * xbee_frame_parser(struct xbee_rawframe * data)
 				send_data[0] = 0;
 				send_data[1] = 0;
 				send_data[2] = START_COMMUNICATION;
-				// xbee_send_data(START_COMMUNICATION, 3, frame->sender_mac, frame->sender_addr);
+				xbee_send_data(START_COMMUNICATION, 3, frame->sender_mac, frame->sender_addr);
 			}
 		case 0x90: {
 				struct xbee_rcv_data * frame = malloc(3 + frame_copy->header.length +1);

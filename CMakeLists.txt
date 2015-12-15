@@ -29,9 +29,10 @@ add_subdirectory(src/drivers)
 add_subdirectory(src/zigbee)
 add_subdirectory(src/sensor)
 add_subdirectory(src/websocket)
+add_subdirectory(src/camera)
 
-#add_executable(${PRJ} ${MAIN})
-add_executable(${PRJ} ${TEST})
-target_link_libraries(${PRJ} drivers zigbee sensor -lm pthread websocket)
+add_executable(${PRJ} ${MAIN})
+#add_executable(${PRJ} ${TEST})
+target_link_libraries(${PRJ} drivers zigbee sensor camera -lm pthread websocket)
 
 
