@@ -72,6 +72,7 @@ void sensor_ask_id(uint8_t * data, uint16_t ip);
 void sensor_receive_id(uint8_t * data);
 void sensor_receive_data(uint8_t * data, uint16_t id, uint8_t len);
 void update_refresh_time(uint16_t id);
+
 // ERREUR défine.
 #define ERR_ID_PARSE 		-2 /*< l'ID du capteur ne correspond pas à ce que l'on attend (LIMIT_SENSOR).*/
 #endif

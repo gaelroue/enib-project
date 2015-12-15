@@ -15,7 +15,7 @@
 #define ASK_ALIVE			0x22 /*< Gestion d'erreur, cf si le distant est vivant*/
 #define START_COMMUNICATION 0xFB /*< Debut d'une communication entre BB et fpga */
 
-
+#include "zigbee/xbee_struct.h"
 /**************************** 
 * sensor_init_client - Initialise les paramètres des capteurs : 
 * 			struct sensor_struct sensor_tab[MAX_SENSOR]  à 0. 
@@ -50,7 +50,7 @@ int remove_sensor(uint16_t id);
 ******************************/
 int rawdata_sensor(uint8_t * data, uint8_t len, uint8_t * ip);
 
-
+void frame_stat(struct tx_status * frame);
 
 
 #ifdef __FPGA__

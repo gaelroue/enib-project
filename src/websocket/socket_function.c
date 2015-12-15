@@ -86,7 +86,7 @@ if ((memoire_partage_sensor=shmget(key,sizeof(struct sensor)*LIMIT_SENSOR,IPC_CR
     exit(1);
   }
   // prise du sémaphore
-  semaphore = init_semaphore();
+  semaphore = init_sem();
 
 }
 
@@ -123,14 +123,13 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
  int nb_sensor = 0; // TO DO : récupérer le nombre de capteur connecter.
   // On appel la mémoire :
   // On va lire la mémoire donc sémaphore take :
-  // if(!take_semaphore()){
-  //   #ifdef __DEBUG__
-  //     printf(" Impossible de prendre le semaphore ...\n");
-  //   #endif
-  //     return;
-  // }
-  memory_attach = (struct sensor *)get_memory_share_p();
-  
+  if(take_sem_sensor() == -1){
+    #ifdef __DEBUG__
+      printf(" Impossible de prendre le semaphore ... On retentera tout à l'heure\n");
+    #endif
+      return;
+  }
+  // memory_attach = (struct sensor *)get_memory_share_p();
   // On parcours tout les sensor, si l'ID est à 0 on passe, sinon on créer le JSOn adéquate.
   char * buf_sensor = (char *)calloc(500, sizeof(char));
   char * buf_to_send = (char *)calloc(500, sizeof(char));
@@ -141,17 +140,17 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
   int i;
   for( i = 0; i < LIMIT_SENSOR; i++){
 
-    if(memory_attach[i].id == 0) continue;
+    if(get_sensor_struct(i)->id == 0) continue;
     if(nb_sensor != 0){
        sprintf(tmp_buf, ",");  
       strcat(buf_sensor,tmp_buf);
     }
     nb_sensor++; // On incrémente le nombre de capteur puisque l'on en ajoute 1.
-    int type = memory_attach[i].type;
-    int data = memory_attach[i].data[0];
+    int type = get_sensor_struct(i)->type;
+    int data = get_sensor_struct(i)->data[0];
     int data2 = 0;
-    int refresh = memory_attach[i].refresh_time[0]<<24 | memory_attach[i].refresh_time[1]<<16 | memory_attach[i].refresh_time[2]<<8 | memory_attach[i].refresh_time[3];
-    int id = memory_attach[i].id;
+    int refresh = get_sensor_struct(i)->refresh_time[0]<<24 | get_sensor_struct(i)->refresh_time[1]<<16 | get_sensor_struct(i)->refresh_time[2]<<8 | get_sensor_struct(i)->refresh_time[3];
+    int id = get_sensor_struct(i)->id;
     int exposant = 0;
     int mantisse = 0;
     float value = 0;
@@ -175,15 +174,27 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
       break;
       case SENSOR_AXIS:
   
-        sprintf(tmp_buf, "{ \"id\" : %d,\"type\" : %d, \n \"value\":[%d,%d,%d],\n \"refresh\":%d }", id, type, (int)memory_attach[i].data[0],(char)memory_attach[i].data[1],(char)memory_attach[i].data[2], refresh);
+        sprintf(tmp_buf, "{ \"id\" : %d,\"type\" : %d, \n \"value\":[%d,%d,%d],\n \"refresh\":%d }", id, type, (int)get_sensor_struct(i)->data[0],(char)get_sensor_struct(i)->data[1],(char)get_sensor_struct(i)->data[2], refresh);
         strcat(buf_sensor,tmp_buf);
       break;
       case SENSOR_ADC :
-        data = (int)100*data/4096;
-        data2 = (int)100*memory_attach[i].data[1]/4096;
-        sprintf(tmp_buf, "{ \"id\" : %d,\"type\" : %d, \n \"value\": [%d, %d],\n \"refresh\":%d }", id, type, data, data2, refresh);  
+      {
+        uint8_t tmp_data_1, tmp_data_2;
+        uint16_t  data_adc_1, data_adc_2;
+        tmp_data_1 = get_sensor_struct(i)->data[0]&0xFF;
+        tmp_data_2 = get_sensor_struct(i)->data[0]>>8&0xFF;
+        data_adc_1 = 100*(tmp_data_2 | tmp_data_1<<8)/4096;
+
+        tmp_data_1 = get_sensor_struct(i)->data[1]&0xFF;
+        tmp_data_2 = get_sensor_struct(i)->data[1]>>8&0xFF;
+        data_adc_2 = 100*(tmp_data_2 | tmp_data_1<<8)/4096;
+     
+        // data = (int)100*get_sensor_struct(i)->data[0]/4096;
+        // data2 = (int)100*get_sensor_struct(i)->data[1]/4096;
+        sprintf(tmp_buf, "{ \"id\" : %d,\"type\" : %d, \n \"value\": [%d, %d],\n \"refresh\":%d }", id, type, data_adc_1, data_adc_2, refresh);  
         strcat(buf_sensor,tmp_buf);
-     break;
+         }
+//     break;
       default:
       break;
     }
@@ -191,7 +202,7 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
      
   }
 
-  // give_semaphore();
+  give_sem_sensor(); // On redonne le sémpahore
 
   strcat(buf_to_send,buf_sensor);
   // On close le JSON
@@ -200,7 +211,7 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
 
 
   #ifdef __DEBUG__
-    printf("buf : %s \n", buf_to_send);
+   printf("buf : %s \n", buf_to_send);
   #endif
   if (nb_sensor != 0) {
     int k;

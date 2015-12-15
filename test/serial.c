@@ -1,39 +1,40 @@
-#include "base.h"
-#include "drivers/xbee_serial.h"
-#include "zigbee/xbee_struct.h"
-#include "zigbee/xbee_client.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <termios.h>
 
-#define PORT "/dev/ttyUSB0"
-
-int main(int argc, char ** argv)
+int main(int argc,char** argv)
 {
-	xbee_open((char *)PORT);
+        struct termios tio;
+       
+        int tty_fd;
 
-	//char * buf =  "\x7E\x00\x04\x08\x01\x4D\x59\x50";
 
-	//char * buf = "\x7E\x00\x10\x10\x01\x00\x00\x00\x00\x00\x00\x00\x00\xFF\xFF\x00\x00\x22\x44\x8A";
-	//char * buf = "\x7E\x00\x04\x08\x01\x4A\x4E\x5E";
-	//char * buf = "\x7E\x00\x04\x08\x01\x57\x52\x4D";
-	//write(xbee->fd, buf, 8); 
-	//
-	//xbee_send_data("\x22", 1, 0, 0);
-	
-	//struct at_command * at = malloc(sizeof(struct xbee_atcommand));
-	//at->at_cmd = "MY";
-	//at->at_cmd = 0x4D59;
+        memset(&tio,0,sizeof(tio));
+        tio.c_iflag=0;
+        tio.c_oflag=0;
+        tio.c_cflag=CS8|CREAD|CLOCAL;           // 8n1, see termios.h for more information
+        tio.c_lflag=0;
+        tio.c_cc[VMIN]=4;
+        tio.c_cc[VTIME]=0;
 
-	xbee_send_atcommand("MY", "", 0);
-	//xbee_send_atwr(xbee->fd, "JN", "\x01", 0);
+        tty_fd=open("/dev/ttyUSB0", O_RDWR | O_NONBLOCK);      
+        cfsetospeed(&tio,B9600);            // 115200 baud
+        cfsetispeed(&tio,B9600);            // 115200 baud
 
-	struct xbee_rawframe * frame = malloc(sizeof(struct xbee_rawframe));
-	xbee_read(frame);
+        tcsetattr(tty_fd,TCSANOW,&tio);
+        char * buf;
+        *buf = 0;
+      while(1){
+      	read(tty_fd, buf, 1);
+      	printf(" %x ", buf);
+      	usleep(50000);
+      }
 
-	xbee_print_frame((uint8_t *)frame);
+        close(tty_fd);
+        // tcsetattr(STDOUT_FILENO,TCSANOW,&old_stdio);
 
-	free(frame);
-	
-	
-	/* Closing file descriptor */
-	xbee_close();
-	return 0;
+        return EXIT_SUCCESS;
 }

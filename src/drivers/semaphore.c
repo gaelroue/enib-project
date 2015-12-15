@@ -6,78 +6,79 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "drivers/semaphore.h"
 #include "sensor/sensor_struct.h"
 #include "sensor/sensor_process.h"
 #include "base.h"
 
 
-int semaphores;
-struct sembuf manipSemaphores;
 
-int init_semaphore(void)
+pthread_mutex_t sensor_tab_mutex;
+pthread_mutex_t UART_mutex;
+
+
+int init_sem(void)
 {
 
 
-	if ((semaphores=semget(CLEF,1,0600)) == -1)
-	{
-      #ifdef __DEBUG__
-        printf("Le sémaphore n'existe pas \n");
-        #endif
-		if ((semaphores=semget(CLEF,1,IPC_CREAT| IPC_EXCL | 0666)) == -1)
-  			{
-  			#ifdef __DEBUG__
-    		printf("Impossible de creer les semaphores");
-    		#endif
-    		return -1;
-  		}
+	// if ((semaphores=semget(CLEF,1,0600)) == -1)
+	// {
+ //      #ifdef __DEBUG__
+ //        printf("Le sémaphore n'existe pas \n");
+ //        #endif
+	// 	if ((semaphores=semget(CLEF,1,IPC_CREAT| IPC_EXCL | 0666)) == -1)
+ //  			{
+ //  			#ifdef __DEBUG__
+ //    		printf("Impossible de creer les semaphores");
+ //    		#endif
+ //    		return -1;
+ //  		}
 
-       semctl(semaphores, 0, SETVAL, 1);
-	}
+ //       semctl(semaphores, 0, SETVAL, 1);
+	// }
 
  
-    manipSemaphores.sem_num=0;
+ //    manipSemaphores.sem_num=0;
 
+  if (pthread_mutex_init(&sensor_tab_mutex, NULL) != 0)
+    {
+        printf("\n Sensor mutex init failed\n");
+        return 1;
+    }
+      if (pthread_mutex_init(&UART_mutex, NULL) != 0)
+    {
+        printf("\n Uart mutex init failed\n");
+        return 1;
+    }
 }
 
 
-int take_semaphore(void)
-{
- 
-
-  manipSemaphores.sem_op=-1; // On décrémente 
-  manipSemaphores.sem_flg = 0; 
-
-
-  int retour; 
-  int count = 200; // 200 ms d'essaie...
-  do{
-    retour = semop(semaphores,&manipSemaphores,1); 
-    count--;
-    usleep(1000); // 1ms
-  }while(retour != 0 && count > 0);
-   
-  if (retour == 0){
-    printf("On a pris le sémaphore");
-    return 1;
-  }else {
-    return -1;
-  }
-}
-
-int give_semaphore(void)
+int take_sem_sensor(void)
 {
 
-  manipSemaphores.sem_op= 1; //Pour un V() on incrémente
+  return pthread_mutex_lock(&sensor_tab_mutex);
 
-
-   int  retour = semop(semaphores,&manipSemaphores,1); 
- printf("On redonne le semaphore ", retour);
- return 0; 
- 
+  
 }
 
-int remove_semaphore(void)
+int give_sem_sensor(void)
 {
-	semctl(semaphores,0,IPC_RMID);
+
+ return pthread_mutex_unlock(&sensor_tab_mutex);
 }
+
+int take_sem_UART(void)
+{
+  int retour = pthread_mutex_lock(&UART_mutex);
+  // printf("retour take sem UART = %d", retour);
+  return retour;
+}
+
+int give_sem_UART(void)
+{
+int retour = pthread_mutex_unlock(&UART_mutex);
+  // printf("retour give sem UART = %d", retour);
+ return pthread_mutex_unlock(&UART_mutex);
+}
+

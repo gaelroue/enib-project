@@ -2,6 +2,7 @@
 	Sensor process
  */
 #include "base.h"
+#include "zigbee/xbee_struct.h"
 #include "sensor/sensor_process.h"
 #include "sensor/sensor_client.h"
 #include "sensor/sensor_struct.h"
@@ -23,21 +24,26 @@ int semaphore;
 void sensor_init_process(void)
 {
 	
-	if ((memoirePartagee=shmget(CLEF,sizeof(struct sensor)*LIMIT_SENSOR,IPC_CREAT|0666)) == -1){
-    	#ifdef __DEBUG__
-			printf("Impossible de creer le segment de memoire partagee");
-		#endif
-		sensor_tab = calloc(LIMIT_SENSOR, sizeof(struct sensor));
-  	} else {
-  		sensor_tab =(struct sensor *)shmat(memoirePartagee,NULL,0);
-  		#ifdef __DEBUG__
-			printf("Adresse de l'attachement : %p \n",sensor_tab);
-		#endif
-  	}
-  	semaphore = init_semaphore();
+	// if ((memoirePartagee=shmget(CLEF,sizeof(struct sensor)*LIMIT_SENSOR,IPC_CREAT|0666)) == -1){
+ //    	#ifdef __DEBUG__
+	// 		printf("Impossible de creer le segment de memoire partagee");
+	// 	#endif
+		
+ //  	} else {
+ //  		sensor_tab =(struct sensor *)shmat(memoirePartagee,NULL,0);
+ //  		#ifdef __DEBUG__
+	// 		printf("Adresse de l'attachement : %p \n",sensor_tab);
+	// 	#endif
+ //  	}
+  	sensor_tab = calloc(LIMIT_SENSOR, sizeof(struct sensor));
+  	semaphore = init_sem();
 	int i;
 	for(i = 1; i < LIMIT_SENSOR; i++){
 		sensor_tab[i].id = 0;
+		sensor_tab[i].stat.nb_send = 0;
+		sensor_tab[i].stat.nb_erreur_send = 0;
+		sensor_tab[i].stat.nb_sucess = 0;
+		sensor_tab[i].stat.nb_receive_total = 0;
 
 	}
 
@@ -111,22 +117,22 @@ void  set_init_refresh_time( uint8_t sensor_type, uint8_t * refresh_time)
 		// 1 seconde;
 			tmp_refresh_time[0] = 0;
 			tmp_refresh_time[1] = 0;
-			tmp_refresh_time[2] = 0x03;
-			tmp_refresh_time[3] = 0xE8; 
+			tmp_refresh_time[2] = 0x13;
+			tmp_refresh_time[3] = 0x88; 
 		break;
 		case SENSOR_LUMI :
 		
 			tmp_refresh_time[0] = 0;
 			tmp_refresh_time[1] = 0;
-			tmp_refresh_time[2] = 0x03;
-			tmp_refresh_time[3] = 0xE8; 
+			tmp_refresh_time[2] = 0x13;
+			tmp_refresh_time[3] = 0x88; 
 		break;
 		case SENSOR_AXIS :
 		// 500 ms
 			tmp_refresh_time[0] = 0;
 			tmp_refresh_time[1] = 0;
-			tmp_refresh_time[2] = 0x03;
-			tmp_refresh_time[3] = 0xE8; 
+			tmp_refresh_time[2] = 0x13;
+			tmp_refresh_time[3] = 0x88; 
 		break;
 		case SENSOR_ADC :
 			tmp_refresh_time[0] = 0;
@@ -195,7 +201,10 @@ void set_data_len(uint16_t id, uint8_t type)
 
 void update_ip(uint16_t id, uint8_t * ip)
 {
-	memcpy(get_sensor_struct(id)->ip, ip, 2);
+	if(ip[0] != 0 && ip[1] != 0 && id < 50){
+		memcpy(get_sensor_struct(id)->ip, ip, 2);
+	}
+	
 }
 
 void  * beagle_check_sensor(void * data)
@@ -246,14 +255,21 @@ void sensor_ask_id(uint8_t * data, uint16_t ip)
 			// }
 			// On obtient un nouvelle ID.
 			uint16_t id = sensor_get_new_id((uint8_t *)&ip);
+
+			// On prend le sémaphore :
+			while(take_sem_sensor() == -1){
+				printf("Attente du semaphore\n");
+			}
+
 			// On note le type du capteur
 			get_sensor_struct(id)->type = data[OFFSET_ASK+1];
 			// On note ID de reconnaissance pour le FPGA.
 			uint16_t id_fpga = data[SENSOR_IDH]<< 8 | data[SENSOR_IDL];
 
-			#ifdef __DEBUG__
-			printf(" --- Demande d'un nouvelle ID --- \n");
-			#endif
+
+			// #ifdef __DEBUG__
+			// printf(" --- Demande d'un nouvelle ID --- \n");
+			// #endif
 			uint8_t * data_to_send = (uint8_t *)calloc(GIVE_ID_LEN, sizeof(uint8_t));
 			set_init_refresh_time(data[OFFSET_ASK + 1], refresh_time);
 			set_data_len(id, data[OFFSET_ASK + 1]);
@@ -281,9 +297,13 @@ void sensor_ask_id(uint8_t * data, uint16_t ip)
 			printf("--- END nouvelle ID ---\n");
 			printf("\n");
 			#endif
-			// give_semaphore();
+			// On rajoute l'envoie pour l'id :
+			get_sensor_struct(id)->stat.nb_send++;
+			give_sem_sensor();
+			
+			// xbee_send_data(data_to_send, GIVE_ID_LEN, 0, ip);
+			xbee_insert_fifo(data_to_send,GIVE_ID_LEN);
 
-			xbee_send_data(data_to_send, GIVE_ID_LEN, 0, ip);
 			
 }
 
@@ -320,19 +340,26 @@ void sensor_receive_data(uint8_t * data, uint16_t id, uint8_t len)
 {
 	uint8_t len_data, n_data, dec, i, j;
 	int data_tmp;
+	printf("Donnée reçu :\n");
+	for(i =0; i < 8; i++){
+		printf("%x ", data[i]);
+	}
+	printf("\n");
 	// On divise les données : 
 	n_data = get_sensor_struct(id)->n_data;
 	len_data = get_sensor_struct(id)->len_data;
 	// TO DO : check len et len_data pour gestion des bug;
-	for(i = 0; i < n_data; i++){
+	for(i = 0; i < n_data*len_data; i = i + len_data){
 		dec = 0;
 		data_tmp = 0;
-		for(j = 0; j < len_data; j++){
 
-			data_tmp  = (data_tmp<<dec) | (data[OFFSET_ASK +1 + j]);
+		for(j = 0; j < len_data; j++){
+			// printf("data[OFFSET_ASK +1 + %d + %i] = %x \n", j,i, data[OFFSET_ASK +1 + j + i]);
+			data_tmp  = (data_tmp<<dec) | (data[OFFSET_ASK +1 + j + i]);
 			dec += 8;
 		}
-			get_sensor_struct(id)->data[i] = data_tmp;
+			get_sensor_struct(id)->data[i/len_data] = data_tmp;
+			// printf("pour i = %d ; data = %d \n", i,data_tmp);
 		
 		//get_sensor_struct(id)->data[i];
 	}
@@ -362,9 +389,13 @@ void update_refresh_time(uint16_t id)
 		data_to_send[SENSOR_IDL] = id&0xFF;
 		data_to_send[OFFSET_ASK] = UPDATE_REFRESH_LEN;
 		memcpy(&data_to_send[OFFSET_ASK+1],get_sensor_struct(id)->refresh_time, 4);
-		xbee_send_data(data_to_send, UPDATE_REFRESH_LEN, 0, get_sensor_struct(id)->ip);
+		// xbee_send_data(data_to_send, UPDATE_REFRESH_LEN, 0, get_sensor_struct(id)->ip);
+		xbee_insert_fifo(data_to_send,UPDATE_REFRESH_LEN);
 		get_sensor_struct(id)->compar_refresh_time = refresh_new;
 
 	}
 
 }													
+
+
+

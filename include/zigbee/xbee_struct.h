@@ -88,4 +88,15 @@ struct __attribute__((__packed__)) xbee_rcv_data
 	       uint8_t data[]; /*< pointeur sur le premier élément des données */
 };
 
+
+struct __attribute__((__packed__))  tx_status
+{
+			struct xbee_header header;
+			uint8_t id;
+			uint8_t ip[2];
+			uint8_t transmit_request;
+			uint8_t delivery_status;
+			uint8_t discovery_status;
+			uint8_t crc;
+};
 #endif

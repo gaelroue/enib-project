@@ -47,8 +47,9 @@ int rawdata_sensor(uint8_t * data, uint8_t len, uint8_t * ip)
 
 	*/
 		 uint16_t id = data[SENSOR_IDH]<< 8 | data[SENSOR_IDL];
+		// printf("ip = %d %d", ip[0], ip[1]);
 		 update_ip(id,ip);
-
+		 
 		
 		//uint16_t id = (uint16_t)data[0]<< 8 | data[1]; 
 	switch(data[OFFSET_ASK]){
@@ -64,6 +65,7 @@ int rawdata_sensor(uint8_t * data, uint8_t len, uint8_t * ip)
 		#endif
 		case DATA: 
 				sensor_receive_data(data, id, len);
+				// get_sensor_struct(id)->stat.nb_receive_total++;
 		break;
 		default:
 		
@@ -88,7 +90,7 @@ uint8_t get_data_from_sensor(uint16_t id)
 		}
 		printf("\n");
 	#endif
-	//xbee_send_data(data, ASK_DATA_LEN, 0, get_sensor_struct(id)->ip);
+	xbee_send_data(data, ASK_DATA_LEN, 0, get_sensor_struct(id)->ip);
 }
 
 #ifdef __FPGA__
@@ -108,3 +110,37 @@ uint8_t set_sensor_fpga(uint8_t * sensor, uint8_t nsensor){
 	return 0;
 }
 #endif
+
+
+void frame_stat(struct tx_status * frame)
+{
+	// On récupère l'id et on note dans les stats :
+	uint8_t id = frame->id;
+	uint8_t i;
+	for(i = 0; i < LIMIT_SENSOR; i++){
+		if(i == id){
+			// On mets a jour les stats :
+			switch(frame->delivery_status){
+			case 0x00:
+				if(!take_sem_sensor()){
+						//On a le sémaphore :
+						get_sensor_struct(i)->stat.nb_sucess++;
+						// printf("nb_sucess of %d : %d\n", i,get_sensor_struct(i)->stat.nb_sucess);
+						give_sem_sensor();
+					}
+			break;
+			default:
+			if(!take_sem_sensor()){
+					//On a le sémaphore :
+					get_sensor_struct(i)->stat.nb_erreur_send++;
+
+					give_sem_sensor();
+				}
+			break;
+		}
+			// On quite la boucle ;)
+			break;
+		}
+	}
+
+}

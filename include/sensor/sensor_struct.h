@@ -15,6 +15,7 @@ struct stats_sensor
 	int time_last_receive;
 	int nb_erreur_receive;
 	int nb_erreur_send;
+	int nb_sucess;
 
 	
 };

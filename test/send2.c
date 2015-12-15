@@ -1,31 +1,31 @@
 //----------------------------------------------------------------------------
 
 #include "base.h"
-#include "drivers/xbee_serial.h"
-#include "zigbee/xbee_struct.h"
 #include "zigbee/xbee_client.h"
-#include "sensor/sensor_client.h"
-#include "sensor/sensor_struct.h"
+#include "websocket/serveur_socket.h"
 
 
 
 int main(int argc, char **argv)
 {
-	if (argc < 2) {
-		printf("use : ./prg PORT\n");
-	}
-	xbee_open((char *)argv[1]);
 
-	uint8_t data[] = { 0x00, 0x00, 0xFE, 0x02};
-	//uint8_t data[] = { 0x00, 0x01, 0x02};
-	//xbee_send_data(data, 3, "\x00\x13\xA2\x00\x40\x94\x46\xCC", 0);
-	while(1) {
-		sleep(1);
-		xbee_send_data(data, 4, 0, 0);
-	}
-	/* Closing file descriptor */
-	xbee_close();
-	return 0;
+// 	printf("test \n");
+// init_fifo();
+
+// // // on insert 2 data :
+// 	uint8_t data[5] = { 0x01, 0x02, 0x03, 4, 5};
+// 	xbee_insert_fifo(data, 5);
+// 	uint8_t i = 0;
+// 	for( i = 0; i < 20; i++){
+// 		xbee_insert_fifo(data, 5);
+// 		xbee_send_fifo(1);
+// 	}
+// 	xbee_send_fifo(2);
+	
+	sensor_init_client();
+	
+	socket_server();
+	
 }
 
 //----------------------------------------------------------------------------
