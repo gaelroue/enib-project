@@ -21,7 +21,7 @@
             return;
         }
         ws.send(msg);
-        document.getElementById('sendmsg').value='';
+        document.getElementById('sendmsg').value=msg;
     }
 
 	function progressFn(value, type)
@@ -144,6 +144,13 @@
   <h1>Sensors Board</h1>
   <div id="banner"></div>
   <div id="contents">
+    <table>
+    <tr><th>Control ds7 led</th></tr>
+    <tr><td>
+      <input id="sendmsg" type="number" onChange="doSend()"></input>
+      <button onClick="doSend()">Send</button>
+    </td></tr>
+    </table>
     <table>
     <tr><th>Sensors</th></tr>
     <tr id="sensors.tr">

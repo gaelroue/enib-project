@@ -164,11 +164,13 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
       case SENSOR_LUMI:
       //printf("\ndata lumi = %x \n", data);
           exposant  = (data&0xF000) >> 12;
+          // printf("exposant = %d\n", exposant);
           // printf("exposant= %x \n", exposant);
-          mantisse  = data&0x0F00 >> 4;
+          mantisse  = (data&0x0F00) >> 4;
           mantisse |= data&0x000F;
+          // printf("mantisse = %d \n", mantisse);
           // printf("mantisse = %x \n", mantisse);
-          value = powf(2,exposant)* mantisse *0.045;
+          value = powf(2,exposant)* mantisse * 0.045;
           sprintf(tmp_buf, "{ \"id\" : %d,\"type\" : %d, \n \"value\":%f,\n \"refresh\":%d }", id, type, value, refresh);    
           strcat(buf_sensor,tmp_buf);
       break;
@@ -211,7 +213,7 @@ void socket_server_check_sensor(struct pollfd * fds, int nfds)
 
 
   #ifdef __DEBUG__
-   printf("buf : %s \n", buf_to_send);
+   // printf("buf : %s \n", buf_to_send);
   #endif
   if (nb_sensor != 0) {
     int k;

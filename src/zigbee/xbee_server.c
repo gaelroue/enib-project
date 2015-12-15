@@ -24,7 +24,7 @@ static void * xbee_frame_parser(struct xbee_rawframe * data)
 	// test de on copie direct la frame ... 
 	struct xbee_rawframe * frame_copy = malloc(3 + tmp->header.length +1);
 	memcpy(frame_copy,tmp, 3 + tmp->header.length +1);
-	xbee_print_frame((uint8_t *)frame_copy);
+	// xbee_print_frame((uint8_t *)frame_copy);
 	/*
 	 * Switch on api type
 	 * IMPORTANT : Don't forget to to unlock mutex once you get your frame

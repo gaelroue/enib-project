@@ -7,6 +7,8 @@
 #include "base.h"
 #include "websocket/socket_function.h"
 #include "websocket/serveur_socket.h"
+#include "sensor/sensor_client.h"
+#include "zigbee/xbee_client.h"
 
 int listener;
 
@@ -96,7 +98,10 @@ void socket_server(void)
 		}
 
 		/* check for data from a connected client */
-
+		uint8_t data[UPDATE_REFRESH_LEN];
+		data[OFFSET_ASK] = UPDATE_REFRESH;
+		data[0]= 0;
+		data[1]= 2;
 		int i =1;
 		while (i<nfds) {
 			if (!rc) break;
@@ -122,6 +127,19 @@ void socket_server(void)
 						printf("socket %d --> %s\n",fds[i].fd, buf);
 					#endif
 						// TO DO : if user send command -> inform sensor
+						uint32_t new_time;
+
+						sscanf(buf,"%d",&new_time);
+						printf("new_time = %d\n", new_time);
+						data[OFFSET_ASK+1] = (new_time&0xFF000000)>>24;
+						data[OFFSET_ASK+2] = (new_time&0x00FF0000)>>16;
+						data[OFFSET_ASK+3] = (new_time&0x0000FF00)>>8;
+						data[OFFSET_ASK+4] = (new_time&0x000000FF); 
+						int i =0;
+						for(i =0; i < UPDATE_REFRESH_LEN; i++){
+							printf(" %x", data[i]);
+						}
+						xbee_insert_fifo(data, UPDATE_REFRESH_LEN);
 					}
 				
 				rc--;

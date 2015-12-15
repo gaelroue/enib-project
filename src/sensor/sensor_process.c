@@ -118,26 +118,26 @@ void  set_init_refresh_time( uint8_t sensor_type, uint8_t * refresh_time)
 			tmp_refresh_time[0] = 0;
 			tmp_refresh_time[1] = 0;
 			tmp_refresh_time[2] = 0x13;
-			tmp_refresh_time[3] = 0x88; 
+			tmp_refresh_time[3] = 0xE8; 
 		break;
 		case SENSOR_LUMI :
 		
 			tmp_refresh_time[0] = 0;
 			tmp_refresh_time[1] = 0;
 			tmp_refresh_time[2] = 0x13;
-			tmp_refresh_time[3] = 0x88; 
+			tmp_refresh_time[3] = 0xE8; 
 		break;
 		case SENSOR_AXIS :
 		// 500 ms
 			tmp_refresh_time[0] = 0;
 			tmp_refresh_time[1] = 0;
 			tmp_refresh_time[2] = 0x13;
-			tmp_refresh_time[3] = 0x88; 
+			tmp_refresh_time[3] = 0xE8; 
 		break;
 		case SENSOR_ADC :
 			tmp_refresh_time[0] = 0;
 			tmp_refresh_time[1] = 0;
-			tmp_refresh_time[2] = 0x03;
+			tmp_refresh_time[2] = 0x13;
 			tmp_refresh_time[3] = 0xE8;
 			break;
 		default:
@@ -340,11 +340,11 @@ void sensor_receive_data(uint8_t * data, uint16_t id, uint8_t len)
 {
 	uint8_t len_data, n_data, dec, i, j;
 	int data_tmp;
-	printf("Donnée reçu :\n");
-	for(i =0; i < 8; i++){
-		printf("%x ", data[i]);
-	}
-	printf("\n");
+	// printf("Donnée reçu :\n");
+	// for(i =0; i < 8; i++){
+	// 	printf("%x ", data[i]);
+	// }
+	// printf("\n");
 	// On divise les données : 
 	n_data = get_sensor_struct(id)->n_data;
 	len_data = get_sensor_struct(id)->len_data;
