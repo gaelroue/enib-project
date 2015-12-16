@@ -17,12 +17,12 @@ int main(int argc, char ** argv)
 
 	init_sem();
 
-	init_camera(argc, argv);
+	// init_camera(argc, argv);
 
-		if (pthread_create(&th_xbee, NULL,camera, 0)) {
-			printf("Error creating thread for xbee_server\n");
-			return -1;
-		}
+		// if (pthread_create(&th_xbee, NULL,camera, 0)) {
+		// 	printf("Error creating thread for xbee_server\n");
+		// 	return -1;
+		// }
 
 
 		if (pthread_create(&th_xbee, NULL,xbee_start_server, 0)) {

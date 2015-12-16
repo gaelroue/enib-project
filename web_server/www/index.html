@@ -15,30 +15,52 @@
         cnode.appendChild(txtNode);
         cnode.appendChild(brNode);
     }
-    function doSend() {
-        var msg = document.getElementById('sendmsg').value;
+    function doSend(id) {
+        var msg = document.getElementById('sendmsg'+id).value;
         if (!msg.length) {
             return;
         }
-        ws.send(msg);
-        document.getElementById('sendmsg').value=msg;
+        ws.send(id+','+msg);
+        document.getElementById('sendmsg'+id).value='';
+    }
+    function activeCamera() {
+        ws.send("255,255");
+    }
+     function init_FPGA() {
+        ws.send("250,250");
     }
 
-	function progressFn(value, type)
+
+	function progressFn(value, type, id)
 	{
-        	div = document.getElementById(type);
+        	div = document.getElementById(id);
+
+		ul = document.createElement('ul');
+		li = document.createElement('li');
+
+		li.innerHTML="Sensor id : "+ id;
+		ul.appendChild(li);
+		li = document.createElement('li');
 		progress = document.createElement('progress');
 		progress.max = 50;
 		progress.min = -10;
 		progress.value = value;
-		div.appendChild(progress);
+		li.appendChild(progress);
+		ul.appendChild(li);
+
+		li = document.createElement('li');
+
+		li.innerHTML=value+ "°";
+		ul.appendChild(li);
+
+		div.appendChild(ul);
 
 
 	}
 
 	function gaugeFn(data, type)
 	{
-        	div = document.getElementById(type);
+        	div = document.getElementById(data.id);
 
 		ul = document.createElement('ul');
 		li = document.createElement('li');
@@ -62,55 +84,126 @@
 
 	}
 
-
-	function displaySensors(data)
+		function gaugePotarFn(data, type)
 	{
-		tr = document.getElementById('sensors.tr');
-		for (i = 0; data.sensor[i]; i++) {
-			td = document.createElement('td');
-			switch(data.sensor[i].type)
-			{
-				case 2:
-					div = document.createElement('div');
-					type = "light";
-					div.id = type;
-					td.appendChild(div);
-					tr.appendChild(td);
-					gaugeFn(data.sensor[i], type)
-				break;
-				case 1:
-					div = document.createElement('div');
-					type = "temperature";
-					div.id = type;
-					td.appendChild(div);
-					tr.appendChild(td);
-					progressFn(data.sensor[i].value, type);
-				break;
-				case 4:
-					div = document.createElement('div');
-					type = "potard";
-					div.id = type;
-					td.appendChild(div);
-					tr.appendChild(td);
-					gaugeFn(data.sensor[i], type)
-				break;
-				case 3:
-					div = document.createElement('div');
-					type = "accelerometre";
-					div.id = type;
+        	div = document.getElementById(data.id);
+
 		ul = document.createElement('ul');
 		li = document.createElement('li');
 
-		li.innerHTML="Sensor id : "+ data.sensor[i].id;
+		li.innerHTML="Sensor id : "+ data.id;
 		ul.appendChild(li);
 		div.appendChild(ul);
 
 		li = document.createElement('li');
 		ul.appendChild(li);
-		li.innerHTML="Accelero : "+ data.sensor[i].value[0]+ " x,"+ data.sensor[i].value[1]+ " y,"+ data.sensor[i].value[2]+" z";
+		li.innerHTML="Potentiometre 1 : " + data.value[0];
 
+		li = document.createElement('li');
+		ul.appendChild(li);
+		li.innerHTML="Potentiometre 2 : " + data.value[1];
+
+
+	}
+
+	function gyroFn(value, id)
+{
+        	div = document.getElementById(id);
+
+		ul = document.createElement('ul');
+		li = document.createElement('li');
+
+		li.innerHTML="Sensor id : "+ id;
+		ul.appendChild(li);
+		div.appendChild(ul);
+
+		li = document.createElement('li');
+		ul.appendChild(li);
+		li.innerHTML="Accelerometre : "+ value[0]+ ' x,'+ value[1]+ ' y,'+ value[2]+' z';
+
+}
+
+	function displayInput(id)
+	{
+			td = document.getElementById("td"+id);
+			input = document.createElement('input');
+			input.id = 'sendmsg'+id;
+			input.type = 'number';
+			// input.onChange = doSend(id);
+			td.appendChild(input);
+			button = document.createElement('button');
+			button.setAttribute( "onClick", "javascript: doSend("+id+");");
+			button.innerHTML = 'Send';
+			td.appendChild(button);
+	}
+
+
+	function displaySensors(data)
+	{
+		tr = document.getElementById('sensors.tr');
+		for (i = 0; data.sensor[i]; i++) {
+			if (document.getElementById(data.sensor[i].id))
+			{
+				div = document.getElementById(data.sensor[i].id)
+				while (div.hasChildNodes()) {
+					div.removeChild(div.firstChild);
+				}
+			switch(data.sensor[i].type)
+			{
+				case 2:
+					gaugeFn(data.sensor[i], type)
+				break;
+				case 1:
+					progressFn(data.sensor[i].value, type, data.sensor[i].id);
+				break;
+				case 3:
+					gyroFn(data.sensor[i].value, data.sensor[i].id);
+				break;
+				case 4:
+					gaugePotarFn(data.sensor[i], type)
+				break;
+
+			}
+
+				continue;
+			}
+
+			td = document.createElement('td');
+			td.id = "td"+data.sensor[i].id;
+			switch(data.sensor[i].type)
+			{
+				case 2:
+					div = document.createElement('div');
+					type = "light";
+					div.id = data.sensor[i].id;
 					td.appendChild(div);
 					tr.appendChild(td);
+					displayInput(data.sensor[i].id);
+
+				break;
+				case 1:
+					div = document.createElement('div');
+					type = "temperature";
+					div.id = data.sensor[i].id;
+					td.appendChild(div);
+					tr.appendChild(td);
+					displayInput(data.sensor[i].id);
+				break;
+				case 4:
+					div = document.createElement('div');
+					type = "potard";
+					div.id = data.sensor[i].id;
+					td.appendChild(div);
+					tr.appendChild(td);
+					displayInput(data.sensor[i].id);
+				break;
+				case 3:
+					div = document.createElement('div');
+					type = "accelerometre";
+					div.id = data.sensor[i].id;
+					td.appendChild(div);
+					tr.appendChild(td);
+					displayInput(data.sensor[i].id);
 //					gaugeFn(data.sensor[i], type)
 				break;
 
@@ -120,16 +213,11 @@
 	}
 
     function init() {
-        ws = new WebSocket('ws://localhost:8080/api');
+        ws = new WebSocket('ws://127.0.0.1:8080/api');
 	//ws.onopen = function(e) {
         //    appendTxtNode('WebSocket opened');
         //};
         ws.onmessage = function(msg) {
-        	tr = document.getElementById('sensors.tr');
-		while (tr.hasChildNodes()) {
-			tr.removeChild(tr.lastChild);
-		}
-
 		data = JSON.parse(msg.data);
 
 		displaySensors(data);
@@ -142,15 +230,13 @@
 </head>
 <body onload="init()">
   <h1>Sensors Board</h1>
-  <div id="banner"></div>
+  <div id="camera">      
+	        <button onClick="activeCamera()">Camera</button>
+  </div>
+  <div id="FPGA">      
+	        <button onClick="init_FPGA()">init FPGA</button>
+  </div>
   <div id="contents">
-    <table>
-    <tr><th>Control ds7 led</th></tr>
-    <tr><td>
-      <input id="sendmsg" type="number" onChange="doSend()"></input>
-      <button onClick="doSend()">Send</button>
-    </td></tr>
-    </table>
     <table>
     <tr><th>Sensors</th></tr>
     <tr id="sensors.tr">

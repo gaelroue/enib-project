@@ -32,3 +32,21 @@ progress::-moz-progress-bar
 	border-radius: 9px;
 
 }
+
+table td
+{
+	table-layout:fixed;
+	width: 500px;
+	height: 700px;
+	border-style:solid;
+	border-width: 3px;
+}
+
+table
+{
+	border-collapse:collapse;
+}
+
+ul {
+	        list-style-type: none;
+}

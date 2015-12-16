@@ -337,7 +337,7 @@ RETURN8:
 
   RETURN;
 }
-
+int nb_cercle;
 // FONCTION DETECTION DE CERCLE
 void cercle(uint8_t *  videoFrame, uint8_t * img_otsu, int width, int height){
 			
@@ -648,25 +648,26 @@ int camera(void)
 	
     while (!quit)
     {
-		uint8_t *ptr=videoFrame;
-		
-		
-		int size=width*height*2;
-		while(size) {
-			int ret = read(STDIN_FILENO, ptr , size);
-			ptr+=ret;
-			size-=ret;
+    	if(activate_camera()){
+			uint8_t *ptr=videoFrame;
+			
+			
+			int size=width*height*2;
+			while(size) {
+				int ret = read(STDIN_FILENO, ptr , size);
+				ptr+=ret;
+				size-=ret;
+			}
+			// TRAME VIDEO DE DEPART
+			proc_func(videoFrame, width, height);
+			// BINARISATION
+			binarisation(videoFrame, width, height,otsu);
+			//DETECTION DE CERCLE
+			//cercle(videoFrame, otsu, width, height);
+			nb_cercle =0;
+			// LABELLISATION DE L'IMAGE ET COMPTAGE
+			LabelImage(width, height, otsu, img_labelled, videoFrame);
 		}
-		// TRAME VIDEO DE DEPART
-		proc_func(videoFrame, width, height);
-		// BINARISATION
-		binarisation(videoFrame, width, height,otsu);
-		//DETECTION DE CERCLE
-		//cercle(videoFrame, otsu, width, height);
-		
-		// LABELLISATION DE L'IMAGE ET COMPTAGE
-		LabelImage(width, height, otsu, img_labelled, videoFrame);
-		
 
     }
 
@@ -677,3 +678,16 @@ int camera(void)
     return EXIT_SUCCESS;
 }
 
+
+int activate = 0;
+
+int activate_camera(int act)
+{
+	if(act != 1){
+		return activate;
+	}
+
+	activate  = ~activate;
+
+	return activate;
+}

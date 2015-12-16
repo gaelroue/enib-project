@@ -40,20 +40,14 @@ Gauge = function(id, type) {
 	ctx.stroke();
 	
 		ctx.fillStyle = color;
-		ctx.font = "50px Arial";
+		ctx.font = "25px Arial";
 		switch(type)
 		{
 			case 2:
 				text = data + " lux";
 			break;
-			case 1:
-				text = data + "°";
-			break;
 			case 4:
 				text = data + "%";
-			break;
-			case 3:
-				text = data + "xyz";
 			break;
 
 		}

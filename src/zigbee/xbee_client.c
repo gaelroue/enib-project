@@ -48,7 +48,9 @@ void xbee_send_data(uint8_t * data, int len, uint8_t * dest_mac, uint16_t dest_a
 
 	xbee_write((uint8_t *) f);
 	// xbee_print_frame((uint8_t *) f);
-	free(f);
+	printf("Free f :");
+//	free(f);
+	printf("... Free\n");
 }
 
 /*

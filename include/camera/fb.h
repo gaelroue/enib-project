@@ -3,5 +3,5 @@
 
 int init_camera(int argc, char *argv[]);
 int camera(void);
-
+int activate_camera(int act);
 #endif

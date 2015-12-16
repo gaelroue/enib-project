@@ -24,7 +24,7 @@ static void * xbee_frame_parser(struct xbee_rawframe * data)
 	// test de on copie direct la frame ... 
 	struct xbee_rawframe * frame_copy = malloc(3 + tmp->header.length +1);
 	memcpy(frame_copy,tmp, 3 + tmp->header.length +1);
-	// xbee_print_frame((uint8_t *)frame_copy);
+	xbee_print_frame((uint8_t *)frame_copy);
 	/*
 	 * Switch on api type
 	 * IMPORTANT : Don't forget to to unlock mutex once you get your frame
@@ -36,11 +36,8 @@ static void * xbee_frame_parser(struct xbee_rawframe * data)
 				struct xbee_idframe * frame = malloc(3 + frame_copy->header.length +1);
 				frame = (struct xbee_idframe *)frame_copy;
 				//memcpy(frame, tmp, 3 + tmp->header.length +1);
-				uint8_t send_data[3];
-				send_data[0] = 0;
-				send_data[1] = 0;
-				send_data[2] = START_COMMUNICATION;
-				xbee_send_data(START_COMMUNICATION, 3, frame->sender_mac, frame->sender_addr);
+				
+				// xbee_send_data(START_COMMUNICATION, 3, frame->sender_mac, frame->sender_addr);
 			}
 		case 0x90: {
 				struct xbee_rcv_data * frame = malloc(3 + frame_copy->header.length +1);
@@ -54,14 +51,14 @@ static void * xbee_frame_parser(struct xbee_rawframe * data)
 				
 			}
 		case 0x8b : {
-				struct tx_status * frame = malloc(0x0b);
-				frame = (struct tx_status *)frame_copy;
-				frame_stat(frame);
+				// struct tx_status * frame = malloc(0x0b);
+				// frame = (struct tx_status *)frame_copy;
+				// frame_stat(frame);
 		}
 		default:
 		break;
 	}
-	
+	// xbee_print_frame((uint8_t *)tmp);
 	free(tmp);
 }
 
@@ -69,6 +66,7 @@ void xbee_start_server(void)
 {
 	
 	for(;;) {
+		print_fifo();
 		xbee_send_fifo(1);
 		struct xbee_rawframe * frame = xbee_read();
 		if(frame->header.delimiter != 0){
